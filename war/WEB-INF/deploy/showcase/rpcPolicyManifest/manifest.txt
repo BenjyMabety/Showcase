@@ -1,0 +1,3 @@
+# Module showcase
+# RPC service class, partial path of RPC policy file
+com.tmg.client.GreetingService, 276C6F0CDEA414676DA3D56C8CE92BAD.gwt.rpc
