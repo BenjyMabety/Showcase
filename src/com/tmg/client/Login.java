@@ -154,7 +154,6 @@ public class Login extends DialogBox {
 					}
 				}
 
-				// Add a handler to send the name to the server
 				MyHandler handler = new MyHandler();
 				sendButton.addClickHandler(handler);
 				nameField.addKeyUpHandler(handler);
