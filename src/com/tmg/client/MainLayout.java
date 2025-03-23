@@ -33,21 +33,33 @@ public class MainLayout extends Composite{
 	VerticalPanel mainPanel;
 	@UiField
 	Label headerLabel;
-	PushButton pb;
+	PushButton pbLogin;
+	PushButton pbGuess;
 	Login login = new Login();
+	GuessingGame gg = new GuessingGame("GWT User");
 	public MainLayout() {
 		initWidget(uiBinder.createAndBindUi(this));		
-		pb = new PushButton("Login Widget");
+		pbLogin = new PushButton("Login Widget");
+		pbGuess = new PushButton("Guessing Game");
 		login = new Login();
 		headerLabel.getElement().setAttribute("style", "font-weight: bold");
-		mainPanel.add(pb);
+		mainPanel.add(pbLogin);
+		mainPanel.add(pbGuess);
 
-		pb.addClickHandler(new ClickHandler() {
+		pbLogin.addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
 			 login.center();
 			 login.setGlassEnabled(true);
+			}});
+		pbGuess.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				// TODO Auto-generated method stub
+				gg.center();
+				gg.setGlassEnabled(true);
 			}});
 	}
 	
