@@ -31,12 +31,15 @@ public class MainLayout extends Composite{
 	}
 	@UiField
 	VerticalPanel mainPanel;
+	@UiField
+	Label headerLabel;
 	PushButton pb;
 	Login login = new Login();
 	public MainLayout() {
 		initWidget(uiBinder.createAndBindUi(this));		
 		pb = new PushButton("Login Widget");
 		login = new Login();
+		headerLabel.getElement().setAttribute("style", "font-weight: bold");
 		mainPanel.add(pb);
 
 		pb.addClickHandler(new ClickHandler() {
@@ -47,4 +50,5 @@ public class MainLayout extends Composite{
 			 login.setGlassEnabled(true);
 			}});
 	}
+	
 }
