@@ -18,5 +18,10 @@
 
 	</g:VerticalPanel>
  </g:west>
+ <g:center>
+ <g:VerticalPanel ui:field="canvasPanel">
+ 	<g:TextArea ui:field="taCanvas"> </g:TextArea>
+ </g:VerticalPanel>
+ </g:center>
 </g:SplitLayoutPanel>
 </ui:UiBinder> 

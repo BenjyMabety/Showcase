@@ -10,10 +10,14 @@
     <servlet-name>greetServlet</servlet-name>
     <servlet-class>com.tmg.server.GreetingServiceImpl</servlet-class>
   </servlet>
+  <servlet>
+    <servlet-name>fileServlet</servlet-name>
+    <servlet-class>com.tmg.server.FileServiceImpl</servlet-class>
+  </servlet>
   
   <servlet-mapping>
-    <servlet-name>greetServlet</servlet-name>
-    <url-pattern>/showcase/greet</url-pattern>
+    <servlet-name>fileServlet</servlet-name>
+    <url-pattern>/showcase/file</url-pattern>
   </servlet-mapping>
   
   <!-- Default page to serve -->
