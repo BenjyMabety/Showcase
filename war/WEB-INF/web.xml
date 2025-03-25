@@ -16,6 +16,10 @@
   </servlet>
   
   <servlet-mapping>
+    <servlet-name>greetServlet</servlet-name>
+    <url-pattern>/showcase/greet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
     <servlet-name>fileServlet</servlet-name>
     <url-pattern>/showcase/file</url-pattern>
   </servlet-mapping>

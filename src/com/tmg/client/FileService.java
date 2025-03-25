@@ -9,4 +9,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("file")
 public interface FileService extends RemoteService {
 	String openFile(String fileName) throws IllegalArgumentException;
+	
+	String saveFile(String fileName, String content) throws IllegalArgumentException;
 }

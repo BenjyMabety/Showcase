@@ -6,8 +6,11 @@ import com.tmg.shared.FieldVerifier;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Scanner;
 
+import com.gargoylesoftware.htmlunit.util.StringUtils;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
@@ -58,7 +61,7 @@ public class FileServiceImpl extends RemoteServiceServlet implements FileService
 		try {
 		    Scanner myReader = new Scanner(file);
 		     while (myReader.hasNextLine()) {
-		          data = myReader.nextLine();
+		          data += parse(myReader.nextLine()+"\n");
 		          System.out.println(data);
 		        }
 		        myReader.close();
@@ -67,5 +70,29 @@ public class FileServiceImpl extends RemoteServiceServlet implements FileService
 			e.printStackTrace();
 		}
 		return data;
+	}
+
+	private String parse(String line) {
+		// TODO Auto-generated method stub
+		if(line.equals(""))
+		{
+			return "\n";
+		}
+		return line;
+	}
+
+	@Override
+	public String saveFile(String fileName, String content) throws IllegalArgumentException {
+		// TODO Auto-generated method stub
+		 try {
+		      FileWriter myWriter = new FileWriter(fileName);
+		      myWriter.write(content);
+		      myWriter.close();
+		      return "Successfully wrote to the file.";
+		    } catch (IOException e) {
+		      
+		      e.printStackTrace();
+		      return "An error occurred.";
+		    }
 	}
 }
