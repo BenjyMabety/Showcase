@@ -1,17 +1,13 @@
 package com.tmg.server;
 
-import com.tmg.client.FileService;
-import com.tmg.shared.FieldVerifier;
-
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
-import com.gargoylesoftware.htmlunit.util.StringUtils;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.tmg.client.FileService;
 
 /**
  * The server-side implementation of the RPC service.
@@ -19,63 +15,27 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 @SuppressWarnings("serial")
 public class FileServiceImpl extends RemoteServiceServlet implements FileService {
 
-	public String greetServer(String input) throws IllegalArgumentException {
-		// Verify that the input is valid. 
-		if (!FieldVerifier.isValidName(input)) {
-			// If the input is not valid, throw an IllegalArgumentException back to
-			// the client.
-			throw new IllegalArgumentException("Name must be at least 4 characters long");
-		}
-
-		String serverInfo = getServletContext().getServerInfo();
-		String userAgent = getThreadLocalRequest().getHeader("User-Agent");
-
-		// Escape data from the client to avoid cross-site script vulnerabilities.
-		input = escapeHtml(input);
-		userAgent = escapeHtml(userAgent);
-
-		return "Hello, " + input + "!<br><br>I am running " + serverInfo + ".<br><br>It looks like you are using:<br>"
-				+ userAgent;
-	}
-
-	/**
-	 * Escape an html string. Escaping data received from the client helps to
-	 * prevent cross-site script vulnerabilities.
-	 * 
-	 * @param html the html string to escape
-	 * @return the escaped string
-	 */
-	private String escapeHtml(String html) {
-		if (html == null) {
-			return null;
-		}
-		return html.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-	}
-
 	@Override
 	public String openFile(String fileName) throws IllegalArgumentException {
-		// TODO Auto-generated method stub
 		File file = new File(fileName);
 		String data = "";
 
 		try {
-		    Scanner myReader = new Scanner(file);
-		     while (myReader.hasNextLine()) {
-		          data += parse(myReader.nextLine()+"\n");
-		          System.out.println(data);
-		        }
-		        myReader.close();
+			Scanner myReader = new Scanner(file);
+			while (myReader.hasNextLine()) {
+				data += parse(myReader.nextLine() + "\n");
+				// System.out.println(data);
+			}
+			myReader.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return "File Not Found:" + fileName;
 		}
 		return data;
 	}
 
 	private String parse(String line) {
-		// TODO Auto-generated method stub
-		if(line.equals(""))
-		{
+		if (line.equals("")) {
 			return "\n";
 		}
 		return line;
@@ -83,16 +43,15 @@ public class FileServiceImpl extends RemoteServiceServlet implements FileService
 
 	@Override
 	public String saveFile(String fileName, String content) throws IllegalArgumentException {
-		// TODO Auto-generated method stub
-		 try {
-		      FileWriter myWriter = new FileWriter(fileName);
-		      myWriter.write(content);
-		      myWriter.close();
-		      return "Successfully wrote to the file.";
-		    } catch (IOException e) {
-		      
-		      e.printStackTrace();
-		      return "An error occurred.";
-		    }
+		try {
+			FileWriter myWriter = new FileWriter(fileName);
+			myWriter.write(content);
+			myWriter.close();
+			return "Successfully wrote to the file.";
+		} catch (IOException e) {
+
+			e.printStackTrace();
+			return "An error occurred.";
+		}
 	}
 }

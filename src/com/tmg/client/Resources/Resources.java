@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.tmg.client;
+package com.tmg.client.Resources;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;

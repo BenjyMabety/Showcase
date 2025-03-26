@@ -8,10 +8,8 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
@@ -26,6 +24,7 @@ public class Login extends DialogBox {
 
 	interface LoginUiBinder extends UiBinder<Widget, Login> {
 	}
+
 	/**
 	 * The message displayed to the user when the server cannot be reached or
 	 * returns an error.
@@ -46,10 +45,9 @@ public class Login extends DialogBox {
 	TextBox nameField;
 	@UiField
 	TextBox passField;
-	
+
 	@UiField
 	Label errorLabel = new Label();
-	
 
 	public Login() {
 		setWidget(uiBinder.createAndBindUi(this));
@@ -68,96 +66,97 @@ public class Login extends DialogBox {
 			public void onClick(ClickEvent event) {
 				hide();
 				passField.setValue("");
-				
-			}});
-		
+
+			}
+		});
+
 		// Create the popup dialog box
 		final DialogBox dialogBox = new DialogBox();
-				dialogBox.setText("Remote Procedure Call");
-				dialogBox.setAnimationEnabled(true);
-				final Button closeButton = new Button("Close");
-				// We can set the id of a widget by accessing its Element
-				closeButton.getElement().setId("closeButton");
-				final Label textToServerLabel = new Label();
-				final HTML serverResponseLabel = new HTML();
-				VerticalPanel dialogVPanel = new VerticalPanel();
-				dialogVPanel.addStyleName("dialogVPanel");
-				dialogVPanel.add(new HTML("<b>Sending name to the server:</b>"));
-				dialogVPanel.add(textToServerLabel);
-				dialogVPanel.add(new HTML("<br><b>Server replies:</b>"));
-				dialogVPanel.add(serverResponseLabel);
-				dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
-				dialogVPanel.add(closeButton);
-				dialogBox.setWidget(dialogVPanel);
+		dialogBox.setText("Remote Procedure Call");
+		dialogBox.setAnimationEnabled(true);
+		final Button closeButton = new Button("Close");
+		// We can set the id of a widget by accessing its Element
+		closeButton.getElement().setId("closeButton");
+		final Label textToServerLabel = new Label();
+		final HTML serverResponseLabel = new HTML();
+		VerticalPanel dialogVPanel = new VerticalPanel();
+		dialogVPanel.addStyleName("dialogVPanel");
+		dialogVPanel.add(new HTML("<b>Sending name to the server:</b>"));
+		dialogVPanel.add(textToServerLabel);
+		dialogVPanel.add(new HTML("<br><b>Server replies:</b>"));
+		dialogVPanel.add(serverResponseLabel);
+		dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
+		dialogVPanel.add(closeButton);
+		dialogBox.setWidget(dialogVPanel);
 
-				// Add a handler to close the DialogBox
-				closeButton.addClickHandler(new ClickHandler() {
-					public void onClick(ClickEvent event) {
-						dialogBox.hide();
-						sendButton.setEnabled(true);
-						sendButton.setFocus(true);
-					}
-				});
+		// Add a handler to close the DialogBox
+		closeButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				dialogBox.hide();
+				sendButton.setEnabled(true);
+				sendButton.setFocus(true);
+			}
+		});
 
-				// Create a handler for the sendButton and nameField
-				class MyHandler implements ClickHandler, KeyUpHandler {
-					/**
-					 * Fired when the user clicks on the sendButton.
-					 */
-					public void onClick(ClickEvent event) {
-						sendNameToServer();
-					}
+		// Create a handler for the sendButton and nameField
+		class MyHandler implements ClickHandler, KeyUpHandler {
+			/**
+			 * Fired when the user clicks on the sendButton.
+			 */
+			public void onClick(ClickEvent event) {
+				sendNameToServer();
+			}
 
-					/**
-					 * Fired when the user types in the nameField.
-					 */
-					public void onKeyUp(KeyUpEvent event) {
-						if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-							sendNameToServer();
-						}
-					}
+			/**
+			 * Fired when the user types in the nameField.
+			 */
+			public void onKeyUp(KeyUpEvent event) {
+				if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+					sendNameToServer();
+				}
+			}
 
-					/**
-					 * Send the name from the nameField to the server and wait for a response.
-					 */
-					private void sendNameToServer() {
-						// First, we validate the input.
-						errorLabel.setText("");
-						String textToServer = nameField.getText();
-						if (!FieldVerifier.isValidName(textToServer)) {
-							errorLabel.setText("Please enter at least four characters");
-							return;
-						}
-
-						// Then, we send the input to the server.
-						sendButton.setEnabled(false);
-						textToServerLabel.setText(textToServer);
-						serverResponseLabel.setText("");
-						greetingService.greetServer(textToServer, new AsyncCallback<String>() {
-							public void onFailure(Throwable caught) {
-								// Show the RPC error message to the user
-								dialogBox.setText("Remote Procedure Call - Failure");
-								serverResponseLabel.addStyleName("serverResponseLabelError");
-								serverResponseLabel.setHTML(SERVER_ERROR);
-								dialogBox.center();
-								closeButton.setFocus(true);
-							}
-
-							public void onSuccess(String result) {
-								dialogBox.setText("Remote Procedure Call");
-								serverResponseLabel.removeStyleName("serverResponseLabelError");
-								serverResponseLabel.setHTML(result);
-								dialogBox.center();
-								closeButton.setFocus(true);
-							}
-						});
-					}
+			/**
+			 * Send the name from the nameField to the server and wait for a response.
+			 */
+			private void sendNameToServer() {
+				// First, we validate the input.
+				errorLabel.setText("");
+				String textToServer = nameField.getText();
+				if (!FieldVerifier.isValidName(textToServer)) {
+					errorLabel.setText("Please enter at least four characters");
+					return;
 				}
 
-				MyHandler handler = new MyHandler();
-				sendButton.addClickHandler(handler);
-				nameField.addKeyUpHandler(handler);
-				
+				// Then, we send the input to the server.
+				sendButton.setEnabled(false);
+				textToServerLabel.setText(textToServer);
+				serverResponseLabel.setText("");
+				greetingService.greetServer(textToServer, new AsyncCallback<String>() {
+					public void onFailure(Throwable caught) {
+						// Show the RPC error message to the user
+						dialogBox.setText("Remote Procedure Call - Failure");
+						serverResponseLabel.addStyleName("serverResponseLabelError");
+						serverResponseLabel.setHTML(SERVER_ERROR);
+						dialogBox.center();
+						closeButton.setFocus(true);
+					}
+
+					public void onSuccess(String result) {
+						dialogBox.setText("Remote Procedure Call");
+						serverResponseLabel.removeStyleName("serverResponseLabelError");
+						serverResponseLabel.setHTML(result);
+						dialogBox.center();
+						closeButton.setFocus(true);
+					}
+				});
+			}
+		}
+
+		MyHandler handler = new MyHandler();
+		sendButton.addClickHandler(handler);
+		nameField.addKeyUpHandler(handler);
+
 	}
 
 }
