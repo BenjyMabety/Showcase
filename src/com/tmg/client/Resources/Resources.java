@@ -11,17 +11,31 @@ import com.google.gwt.resources.client.ImageResource;
  */
 public interface Resources extends ClientBundle {
 
-	 @Source("edit.png")
-	 ImageResource edit();
-	 
-	 @Source("load.png")
-	 ImageResource load();
-	 
-	 @Source("new_file.png")
-	 ImageResource new_file();
-	 
-	 @Source("save.png")
-	 ImageResource save();
-	 
-	
+	@Source("ball.png")
+	ImageResource ball();
+
+	@Source("down.png")
+	ImageResource down();
+
+	@Source("edit.png")
+	ImageResource edit();
+
+	@Source("left.png")
+	ImageResource left();
+
+	@Source("load.png")
+	ImageResource load();
+
+	@Source("new_file.png")
+	ImageResource new_file();
+
+	@Source("right.png")
+	ImageResource right();
+
+	@Source("save.png")
+	ImageResource save();
+
+	@Source("up.png")
+	ImageResource up();
+
 }

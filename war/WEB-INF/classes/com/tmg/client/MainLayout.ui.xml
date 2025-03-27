@@ -19,15 +19,19 @@
 	</g:VerticalPanel>
  </g:west>
  <g:center>
- <g:HorizontalPanel>
+ <g:HorizontalPanel ui:field="mainCanvas">
  <g:VerticalPanel ui:field="canvasPanel">
  <g:TextBox ui:field = "tbDocument" visible="false" readOnly = "true"></g:TextBox>
  	<g:TextArea ui:field="taCanvas" visible="false" readOnly="true" width="500px" height="500px" > </g:TextArea>
  </g:VerticalPanel>
  <g:VerticalPanel ui:field="buttonPanel" visible="false">
- 
   </g:VerticalPanel>
  </g:HorizontalPanel>
  </g:center>
+ <g:east size = '400'>
+ <g:VerticalPanel ui:field="controlPanel" visible ="false">
+
+ </g:VerticalPanel>
+ </g:east>
 </g:SplitLayoutPanel>
 </ui:UiBinder> 

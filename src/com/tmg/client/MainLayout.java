@@ -1,6 +1,7 @@
 package com.tmg.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -8,6 +9,8 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PushButton;
@@ -30,6 +33,10 @@ public class MainLayout extends Composite {
 	@UiField
 	VerticalPanel mainPanel;
 	@UiField
+	HorizontalPanel mainCanvas;
+	@UiField
+	VerticalPanel controlPanel;
+	@UiField
 	VerticalPanel canvasPanel;
 	@UiField
 	TextArea taCanvas;
@@ -50,25 +57,39 @@ public class MainLayout extends Composite {
 	PushButton saveButton = new PushButton(saveImage);
 	PushButton newButton = new PushButton(newImage);
 
+	Image up = new Image(resources.up());
+	Image down = new Image(resources.down());
+	Image left = new Image(resources.left());
+	Image right = new Image(resources.right());
+
+	PushButton upButton = new PushButton(up);
+	PushButton downButton = new PushButton(down);
+	PushButton leftButton = new PushButton(left);
+	PushButton rightButton = new PushButton(right);
+
 	PushButton pbLogin;
 	PushButton pbGuess;
 	PushButton pbFileViewer;
+	PushButton pbBall;
 
 	Login login = new Login();
 	GuessingGame gg = new GuessingGame();
 	FileViewer viewer = new FileViewer();
+	Ball ball = new Ball();
 
 	public MainLayout() {
 		initWidget(uiBinder.createAndBindUi(this));
 		pbLogin = new PushButton("Login Widget");
 		pbGuess = new PushButton("Guessing Game");
 		pbFileViewer = new PushButton("File Viewer");
+		pbBall = new PushButton("Ball");
 
 		login = new Login();
 		headerLabel.getElement().setAttribute("style", "font-weight: bold");
 		mainPanel.add(pbLogin);
 		mainPanel.add(pbGuess);
 		mainPanel.add(pbFileViewer);
+		mainPanel.add(pbBall);
 
 		editButton.setTitle("Edit");
 		saveButton.setTitle("Save");
@@ -78,6 +99,15 @@ public class MainLayout extends Composite {
 		buttonPanel.add(editButton);
 		buttonPanel.add(saveButton);
 		buttonPanel.add(loadButton);
+
+		controlPanel.add(upButton);
+
+		HorizontalPanel hp = new HorizontalPanel();
+		hp.add(leftButton);
+		hp.add(downButton);
+		hp.add(rightButton);
+		controlPanel.add(hp);
+		controlPanel.setCellHorizontalAlignment(upButton, HasHorizontalAlignment.ALIGN_CENTER);
 
 		pbLogin.addClickHandler(new ClickHandler() {
 
@@ -90,6 +120,8 @@ public class MainLayout extends Composite {
 				buttonPanel.setVisible(false);
 				tbDocument.setText("");
 				tbDocument.setReadOnly(true);
+				mainCanvas.remove(ball.getBall());
+				controlPanel.setVisible(false);
 
 			}
 		});
@@ -104,6 +136,9 @@ public class MainLayout extends Composite {
 				buttonPanel.setVisible(false);
 				tbDocument.setText("");
 				tbDocument.setReadOnly(true);
+				mainCanvas.remove(ball.getBall());
+				controlPanel.setVisible(false);
+
 			}
 		});
 		ClickHandler openHandler = new ClickHandler() {
@@ -114,10 +149,14 @@ public class MainLayout extends Composite {
 				taCanvas.setVisible(true);
 				tbDocument.setVisible(true);
 				viewer.openButton.setEnabled(true);
+				canvasPanel.setVisible(true);
 				buttonPanel.setVisible(true);
 				viewer.center();
 				viewer.setGlassEnabled(true);
 				tbDocument.setReadOnly(true);
+				mainCanvas.remove(ball.getBall());
+				controlPanel.setVisible(false);
+
 			}
 		};
 		pbFileViewer.addClickHandler(openHandler);
@@ -174,6 +213,74 @@ public class MainLayout extends Composite {
 
 			}
 		});
+		pbBall.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				// TODO Auto-generated method stub
+				canvasPanel.setVisible(false);
+				buttonPanel.setVisible(false);
+				controlPanel.setVisible(true);
+				mainCanvas.add(ball.setLife().asWidget());
+
+			}
+		});
+		rightButton.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				// TODO Auto-generated method stub
+				moveX(30);
+
+			}
+		});
+
+		leftButton.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				// TODO Auto-generated method stub
+				moveX(-30);
+
+			}
+		});
+		upButton.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				// TODO Auto-generated method stub
+				moveY(-30);
+
+			}
+		});
+
+		downButton.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				// TODO Auto-generated method stub
+				moveY(30);
+
+			}
+		});
+
+	}
+
+	/**
+	 * @param value
+	 */
+	protected void moveX(int value) {
+
+		ball.getBall().getParent().getElement().getStyle().setLeft(ball.getRightStep() + value, Unit.PX);
+		ball.setRightStep(ball.getRightStep() + value);
+
+	}
+
+	protected void moveY(int value) {
+
+		ball.getBall().getParent().getElement().getStyle().setTop(ball.getTopStep() + value, Unit.PX);
+		ball.setTopStep(ball.getTopStep() + value);
+
 	}
 
 }
