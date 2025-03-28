@@ -20,6 +20,7 @@ public class Ball extends Composite {
 	boolean live = false;
 	private int rightStep = 0;
 	private int topStep = 0;
+	private int mass = 3;
 
 	Image ball = new Image(resources.ball());
 
@@ -74,5 +75,13 @@ public class Ball extends Composite {
 
 	public void setTopStep(int topStep) {
 		this.topStep = topStep;
+	}
+
+	public int getMass() {
+		return mass;
+	}
+
+	public void setMass(int mass) {
+		this.mass = mass;
 	}
 }

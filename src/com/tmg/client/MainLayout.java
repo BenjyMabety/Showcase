@@ -19,6 +19,8 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.tmg.client.Resources.Resources;
+import com.tmg.shared.MyFoo.MyStyle;
+import com.tmg.shared.Physics;
 
 public class MainLayout extends Composite {
 
@@ -26,6 +28,7 @@ public class MainLayout extends Composite {
 	private final FileServiceAsync fileService = GWT.create(FileService.class);
 
 	Resources resources = GWT.create(Resources.class);
+	Physics physics = new Physics();
 
 	interface MainLayoutUiBinder extends UiBinder<Widget, MainLayout> {
 	}
@@ -46,11 +49,14 @@ public class MainLayout extends Composite {
 	TextBox tbDocument;
 	@UiField
 	VerticalPanel buttonPanel;
+	@UiField
+	MyStyle style;
 
 	Image editImage = new Image(resources.edit());
 	Image loadImage = new Image(resources.load());
 	Image saveImage = new Image(resources.save());
 	Image newImage = new Image(resources.new_file());
+	Image hardWood = new Image(resources.hardwood1());
 
 	PushButton editButton = new PushButton(editImage);
 	PushButton loadButton = new PushButton(loadImage);
@@ -120,9 +126,9 @@ public class MainLayout extends Composite {
 				buttonPanel.setVisible(false);
 				tbDocument.setText("");
 				tbDocument.setReadOnly(true);
-				mainCanvas.remove(ball.getBall());
+				mainCanvas.remove(ball.getLife());
 				controlPanel.setVisible(false);
-
+				setEnabled(false);
 			}
 		});
 		pbGuess.addClickHandler(new ClickHandler() {
@@ -136,9 +142,9 @@ public class MainLayout extends Composite {
 				buttonPanel.setVisible(false);
 				tbDocument.setText("");
 				tbDocument.setReadOnly(true);
-				mainCanvas.remove(ball.getBall());
+				mainCanvas.remove(ball.getLife());
 				controlPanel.setVisible(false);
-
+				setEnabled(false);
 			}
 		});
 		ClickHandler openHandler = new ClickHandler() {
@@ -154,9 +160,9 @@ public class MainLayout extends Composite {
 				viewer.center();
 				viewer.setGlassEnabled(true);
 				tbDocument.setReadOnly(true);
-				mainCanvas.remove(ball.getBall());
+				mainCanvas.remove(ball.getLife());
 				controlPanel.setVisible(false);
-
+				setEnabled(false);
 			}
 		};
 		pbFileViewer.addClickHandler(openHandler);
@@ -222,7 +228,15 @@ public class MainLayout extends Composite {
 				buttonPanel.setVisible(false);
 				controlPanel.setVisible(true);
 				mainCanvas.add(ball.setLife().asWidget());
-
+				setEnabled(true);
+				// mainCanvas.getParent().getElement().getStyle().setBackgroundImage("url('images/hardwood1.png')");
+				// mainCanvas.getParent().getElement().setAttribute("style",
+				// "background-repeat:no-repeat");
+				// mainCanvas.getParent().getElement().getStyle().setBackgroundImage("url('images/hardwood1.png')");
+				// mainCanvas.getParent().getElement().setAttribute("style",
+				// "background-image: url('images/hardwood1.png');
+				// background-repeat:no-repeat;background-position: center;background-size:
+				// auto;");
 			}
 		});
 		rightButton.addClickHandler(new ClickHandler() {
@@ -230,7 +244,7 @@ public class MainLayout extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				// TODO Auto-generated method stub
-				moveX(30);
+				moveX(physics.getForce(ball.getMass(), false));
 
 			}
 		});
@@ -240,7 +254,7 @@ public class MainLayout extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				// TODO Auto-generated method stub
-				moveX(-30);
+				moveX(-physics.getForce(ball.getMass(), false));
 
 			}
 		});
@@ -249,7 +263,7 @@ public class MainLayout extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				// TODO Auto-generated method stub
-				moveY(-30);
+				moveY(-physics.getForce(ball.getMass(), false));
 
 			}
 		});
@@ -259,7 +273,7 @@ public class MainLayout extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				// TODO Auto-generated method stub
-				moveY(30);
+				moveY(physics.getForce(ball.getMass(), true));
 
 			}
 		});
@@ -281,6 +295,11 @@ public class MainLayout extends Composite {
 		ball.getBall().getParent().getElement().getStyle().setTop(ball.getTopStep() + value, Unit.PX);
 		ball.setTopStep(ball.getTopStep() + value);
 
+	}
+
+	void setEnabled(boolean enabled) {
+		getElement().addClassName(enabled ? style.enabled() : style.disabled());
+		getElement().removeClassName(enabled ? style.disabled() : style.enabled());
 	}
 
 }

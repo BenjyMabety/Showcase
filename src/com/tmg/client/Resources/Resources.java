@@ -20,6 +20,9 @@ public interface Resources extends ClientBundle {
 	@Source("edit.png")
 	ImageResource edit();
 
+	@Source("hardwood1.png")
+	ImageResource hardwood1();
+
 	@Source("left.png")
 	ImageResource left();
 
