@@ -91,7 +91,7 @@ public class MainLayout extends Composite {
 		pbFileViewer = new PushButton("File Viewer");
 		pbBall = new PushButton("Ball (Physics)");
 		// Disabling for Github purposes
-		pbBall.setEnabled(false);
+		// pbBall.setEnabled(false);
 
 		login = new Login();
 		headerLabel.getElement().setAttribute("style", "font-weight: bold");
