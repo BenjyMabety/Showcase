@@ -21,6 +21,8 @@ public class Ball extends Composite {
 	private int rightStep = 0;
 	private int topStep = 0;
 	private int mass = 3;
+	private boolean suspended = true;
+	private boolean falling = true;
 
 	Image ball = new Image(resources.ball());
 
@@ -83,5 +85,21 @@ public class Ball extends Composite {
 
 	public void setMass(int mass) {
 		this.mass = mass;
+	}
+
+	public boolean isSuspended() {
+		return suspended;
+	}
+
+	public void setSuspended(boolean suspended) {
+		this.suspended = suspended;
+	}
+
+	public boolean isFalling() {
+		return falling;
+	}
+
+	public void setFalling(boolean falling) {
+		this.falling = falling;
 	}
 }

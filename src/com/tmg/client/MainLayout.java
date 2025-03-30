@@ -6,6 +6,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
@@ -88,7 +89,9 @@ public class MainLayout extends Composite {
 		pbLogin = new PushButton("Login Widget");
 		pbGuess = new PushButton("Guessing Game");
 		pbFileViewer = new PushButton("File Viewer");
-		pbBall = new PushButton("Ball");
+		pbBall = new PushButton("Ball (Physics)");
+		// Disabling for Github purposes
+		pbBall.setEnabled(false);
 
 		login = new Login();
 		headerLabel.getElement().setAttribute("style", "font-weight: bold");
@@ -244,7 +247,7 @@ public class MainLayout extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				// TODO Auto-generated method stub
-				moveX(physics.getForce(ball.getMass(), false));
+				moveX(physics.getForce(ball.getMass(), false, false));
 
 			}
 		});
@@ -254,7 +257,7 @@ public class MainLayout extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				// TODO Auto-generated method stub
-				moveX(-physics.getForce(ball.getMass(), false));
+				moveX(-physics.getForce(ball.getMass(), false, false));
 
 			}
 		});
@@ -263,7 +266,9 @@ public class MainLayout extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				// TODO Auto-generated method stub
-				moveY(-physics.getForce(ball.getMass(), false));
+				moveY(-physics.getForce(ball.getMass(), false, false));
+				ball.setSuspended(true);
+				ball.setFalling(false);
 
 			}
 		});
@@ -273,7 +278,28 @@ public class MainLayout extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				// TODO Auto-generated method stub
-				moveY(physics.getForce(ball.getMass(), true));
+				if (ball.isSuspended()) {
+					ball.setFalling(true);
+				}
+				if (ball.isSuspended() && ball.isFalling()) {
+					ball.setFalling(true);
+					Timer t = new Timer() {
+
+						@Override
+						public void run() {
+							// TODO Auto-generated method stub
+							if (ball.isSuspended()) {
+								moveY(physics.getForce(ball.getMass(), ball.isFalling(), true));
+							} else {
+								// ();
+							}
+						}
+					};
+
+					t.scheduleRepeating(physics.getForce(ball.getMass(), ball.isFalling(), true));
+				} else {
+					moveY(physics.getForce(ball.getMass(), ball.isFalling(), false));
+				}
 
 			}
 		});
@@ -292,8 +318,21 @@ public class MainLayout extends Composite {
 
 	protected void moveY(int value) {
 
-		ball.getBall().getParent().getElement().getStyle().setTop(ball.getTopStep() + value, Unit.PX);
-		ball.setTopStep(ball.getTopStep() + value);
+		if (ball.isSuspended()) {
+			if (ball.getBall().getParent().getAbsoluteTop() <= 480) {
+				ball.getBall().getParent().getElement().getStyle().setTop(ball.getTopStep() + value, Unit.PX);
+				ball.setTopStep(ball.getTopStep() + value);
+			} else {
+
+				ball.setSuspended(false);
+				// Window.alert(value + "");
+				moveY(value * -1);
+
+			}
+		} else {
+			ball.getBall().getParent().getElement().getStyle().setTop(ball.getTopStep() + value, Unit.PX);
+			ball.setTopStep(ball.getTopStep() + value);
+		}
 
 	}
 
