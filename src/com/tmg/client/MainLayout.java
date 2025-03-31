@@ -4,6 +4,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
@@ -17,6 +19,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.tmg.client.Resources.Resources;
@@ -78,6 +81,7 @@ public class MainLayout extends Composite {
 	PushButton pbGuess;
 	PushButton pbFileViewer;
 	PushButton pbBall;
+	ToggleButton tbFriction;
 
 	Login login = new Login();
 	GuessingGame gg = new GuessingGame();
@@ -90,6 +94,18 @@ public class MainLayout extends Composite {
 		pbGuess = new PushButton("Guessing Game");
 		pbFileViewer = new PushButton("File Viewer");
 		pbBall = new PushButton("Ball (Physics)");
+		tbFriction = new ToggleButton("Friction");
+		tbFriction.setValue(true);
+		tbFriction.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+
+			@Override
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				// TODO Auto-generated method stub
+				physics.setFriction(event.getValue());
+
+			}
+		});
+
 		// Disabling for Github purposes
 		// pbBall.setEnabled(false);
 
@@ -116,6 +132,8 @@ public class MainLayout extends Composite {
 		hp.add(downButton);
 		hp.add(rightButton);
 		controlPanel.add(hp);
+		controlPanel.add(tbFriction);
+
 		controlPanel.setCellHorizontalAlignment(upButton, HasHorizontalAlignment.ALIGN_CENTER);
 
 		pbLogin.addClickHandler(new ClickHandler() {
@@ -232,14 +250,6 @@ public class MainLayout extends Composite {
 				controlPanel.setVisible(true);
 				mainCanvas.add(ball.setLife().asWidget());
 				setEnabled(true);
-				// mainCanvas.getParent().getElement().getStyle().setBackgroundImage("url('images/hardwood1.png')");
-				// mainCanvas.getParent().getElement().setAttribute("style",
-				// "background-repeat:no-repeat");
-				// mainCanvas.getParent().getElement().getStyle().setBackgroundImage("url('images/hardwood1.png')");
-				// mainCanvas.getParent().getElement().setAttribute("style",
-				// "background-image: url('images/hardwood1.png');
-				// background-repeat:no-repeat;background-position: center;background-size:
-				// auto;");
 			}
 		});
 		rightButton.addClickHandler(new ClickHandler() {
@@ -266,9 +276,11 @@ public class MainLayout extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				// TODO Auto-generated method stub
-				moveY(-physics.getForce(ball.getMass(), false, false));
 				ball.setSuspended(true);
 				ball.setFalling(false);
+				ball.setStationery(false);
+				ball.setGap(0);
+				moveY(-physics.getForce(ball.getMass(), false, false), false);
 
 			}
 		});
@@ -278,29 +290,54 @@ public class MainLayout extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				// TODO Auto-generated method stub
-				if (ball.isSuspended()) {
-					ball.setFalling(true);
-				}
-				if (ball.isSuspended() && ball.isFalling()) {
-					ball.setFalling(true);
-					Timer t = new Timer() {
+				ball.setPointOfOrigin(ball.getBall().getParent().getAbsoluteTop());
+				if (!ball.isStationery()) {
+					if (ball.isSuspended()) {
+						ball.setFalling(true);
+					}
+					if (ball.isSuspended() && ball.isFalling()) {
+						ball.setFalling(true);
+						Timer t = new Timer() {
 
-						@Override
-						public void run() {
-							// TODO Auto-generated method stub
-							if (ball.isSuspended()) {
-								moveY(physics.getForce(ball.getMass(), ball.isFalling(), true));
-							} else {
-								// ();
+							@Override
+							public void run() {
+								// TODO Auto-generated method stub
+								if (ball.isSuspended()) {
+									moveY(physics.getForce(ball.getMass(), ball.isFalling(), false), isRunning());
+								} else {
+									// Window.alert(ball.getBall().getParent().getAbsoluteTop() + "");
+									if (ball.getBall().getParent().getAbsoluteTop() >= getArc()) {
+										moveY(physics.getForce(ball.getMass(), ball.isFalling(), true), isRunning());
+									} else {
+										ball.setFalling(true);
+										ball.setSuspended(true);
+									}
+								}
 							}
-						}
-					};
 
-					t.scheduleRepeating(physics.getForce(ball.getMass(), ball.isFalling(), true));
-				} else {
-					moveY(physics.getForce(ball.getMass(), ball.isFalling(), false));
+							private int getArc() {
+								// TODO Auto-generated method stub
+								// Window.alert( + "");
+								int bounce = 181 + ball.getGap();
+								if (physics.isFriction()) {
+									ball.setRunningGap(ball.getMass());
+								}
+								if (ball.getGap() == 330) {
+									ball.setFalling(false);
+									ball.setSuspended(false);
+									ball.setStationery(true);
+									cancel();
+								}
+								return bounce;
+							}
+						};
+
+						t.scheduleRepeating(physics.getForce(ball.getMass(), ball.isFalling(), false));
+					} else {
+						moveY(physics.getForce(ball.getMass(), ball.isFalling(), false), false);
+					}
+
 				}
-
 			}
 		});
 
@@ -316,20 +353,25 @@ public class MainLayout extends Composite {
 
 	}
 
-	protected void moveY(int value) {
+	protected void moveY(int value, boolean running) {
 
-		if (ball.isSuspended()) {
-			if (ball.getBall().getParent().getAbsoluteTop() <= 480) {
-				ball.getBall().getParent().getElement().getStyle().setTop(ball.getTopStep() + value, Unit.PX);
-				ball.setTopStep(ball.getTopStep() + value);
+		if (running) {
+			if (ball.isSuspended()) {
+				if (ball.getBall().getParent().getAbsoluteTop() <= 450) {
+					ball.getBall().getParent().getElement().getStyle().setTop(ball.getTopStep() + value, Unit.PX);
+					ball.setTopStep(ball.getTopStep() + value);
+				} else {
+
+					ball.setSuspended(false);
+				}
 			} else {
 
-				ball.setSuspended(false);
-				// Window.alert(value + "");
-				moveY(value * -1);
-
+				ball.getBall().getParent().getElement().getStyle().setTop(ball.getTopStep() + value, Unit.PX);
+				ball.setTopStep(ball.getTopStep() + value);
 			}
 		} else {
+			// Window.alert("not running, logic here..suspended:" + ball.isSuspended() +
+			// "falling:" + ball.isFalling());
 			ball.getBall().getParent().getElement().getStyle().setTop(ball.getTopStep() + value, Unit.PX);
 			ball.setTopStep(ball.getTopStep() + value);
 		}

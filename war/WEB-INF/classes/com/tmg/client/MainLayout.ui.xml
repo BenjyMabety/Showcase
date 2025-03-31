@@ -35,4 +35,5 @@
  </g:VerticalPanel>
  </g:east>
 </g:SplitLayoutPanel>
+
 </ui:UiBinder> 

@@ -1,8 +1,6 @@
 package com.tmg.client;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
@@ -23,21 +21,15 @@ public class Ball extends Composite {
 	private int mass = 3;
 	private boolean suspended = true;
 	private boolean falling = true;
+	private int gap = 0;
+	private boolean stationery = false;
+	private int pointOfOrigin = 0;
 
 	Image ball = new Image(resources.ball());
 
 	public Ball() {
 		initWidget(uiBinder.createAndBindUi(this));
-		ball.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				// TODO Auto-generated method stub
-				// Window.alert("clicked");
-
-			}
-		});
-
+		// Image.wrap(fp.getElement());
 	}
 
 	/**
@@ -101,5 +93,33 @@ public class Ball extends Composite {
 
 	public void setFalling(boolean falling) {
 		this.falling = falling;
+	}
+
+	public int getGap() {
+		return gap;
+	}
+
+	public void setRunningGap(int gap) {
+		this.gap += gap;
+	}
+
+	public void setGap(int gap) {
+		this.gap = gap;
+	}
+
+	public boolean isStationery() {
+		return stationery;
+	}
+
+	public void setStationery(boolean stationery) {
+		this.stationery = stationery;
+	}
+
+	public int getPointOfOrigin() {
+		return pointOfOrigin;
+	}
+
+	public void setPointOfOrigin(int pointOfOrigin) {
+		this.pointOfOrigin = pointOfOrigin;
 	}
 }

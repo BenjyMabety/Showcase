@@ -4,7 +4,6 @@
 package com.tmg.shared;
 
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 
 /**
  * 
@@ -18,21 +17,25 @@ public class Physics {
 	private int gravity = 10;
 	int acceleration = 15;
 	Timer t;
-	double friction = -0.2;
+	double drag = 0.2;
+	int resistance = 0;
 	private boolean bounce = false;
+	boolean friction = true;
 
 	public Physics() {
 		// TODO Auto-generated constructor stub
 	}
 
 	public int getForce(int mass, boolean isFalling, boolean bounce) {
-		if (isFalling) {
+		if (isFalling && !bounce) {
 			force = mass * gravity;
 			return force;
 		} else if (isFalling && bounce) {
-			force = (int) (Integer.valueOf(mass * gravity) * friction);
-			Window.alert("force is: " + force);
-
+			resistance = (int) (Integer.valueOf(mass * gravity) * drag);
+			// Window.alert("friction force:" + friction);
+			force = (mass * gravity) - resistance;
+			// Window.alert("minus force:" + force);
+			return -force;
 		}
 		force = mass * acceleration;
 		return force;
@@ -52,6 +55,14 @@ public class Physics {
 
 	public void setGravity(int gravity) {
 		this.gravity = gravity;
+	}
+
+	public boolean isFriction() {
+		return friction;
+	}
+
+	public void setFriction(boolean friction) {
+		this.friction = friction;
 	}
 
 }
