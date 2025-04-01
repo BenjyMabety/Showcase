@@ -11,7 +11,6 @@ public class MyFoo extends Widget {
 	}
 
 	public MyFoo() {
-		// TODO Auto-generated constructor stub
 	}
 
 }

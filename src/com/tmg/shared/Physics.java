@@ -3,64 +3,64 @@
  */
 package com.tmg.shared;
 
-import com.google.gwt.user.client.Timer;
-
 /**
- * 
+ * Physics engine
  */
 public class Physics {
 
-	/**
-	 * 
-	 */
 	private int force = 0;
 	private int gravity = 10;
-	int acceleration = 15;
-	Timer t;
-	double drag = 0.2;
-	int resistance = 0;
-	private boolean bounce = false;
-	boolean friction = true;
+	private int acceleration = 15;
+	private double drag = 0.2;
+	private int resistance = 0;
+	private boolean friction = true;
 
 	public Physics() {
-		// TODO Auto-generated constructor stub
 	}
 
+	/**
+	 * @param mass
+	 * @param isFalling
+	 * @param bounce
+	 * @return
+	 */
 	public int getForce(int mass, boolean isFalling, boolean bounce) {
 		if (isFalling && !bounce) {
 			force = mass * gravity;
 			return force;
 		} else if (isFalling && bounce) {
 			resistance = (int) (Integer.valueOf(mass * gravity) * drag);
-			// Window.alert("friction force:" + friction);
 			force = (mass * gravity) - resistance;
-			// Window.alert("minus force:" + force);
 			return -force;
 		}
 		force = mass * acceleration;
 		return force;
 	}
 
-	public Timer getT() {
-		return t;
-	}
-
-	public void setT(Timer t) {
-		this.t = t;
-	}
-
+	/**
+	 * @return
+	 */
 	public int getGravity() {
 		return gravity;
 	}
 
+	/**
+	 * @param gravity
+	 */
 	public void setGravity(int gravity) {
 		this.gravity = gravity;
 	}
 
+	/**
+	 * @return
+	 */
 	public boolean isFriction() {
 		return friction;
 	}
 
+	/**
+	 * @param friction
+	 */
 	public void setFriction(boolean friction) {
 		this.friction = friction;
 	}
