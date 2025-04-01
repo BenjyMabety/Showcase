@@ -105,7 +105,6 @@ public class MainLayout extends Composite {
 
 			}
 		});
-
 		// Disabling for Github purposes
 		// pbBall.setEnabled(false);
 
@@ -290,7 +289,10 @@ public class MainLayout extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				// TODO Auto-generated method stub
-				ball.setPointOfOrigin(ball.getBall().getParent().getAbsoluteTop());
+				if (upButton.isEnabled() && downButton.isEnabled() && !ball.isStationery()) {
+					upButton.setEnabled(false);
+					downButton.setEnabled(false);
+				}
 				if (!ball.isStationery()) {
 					if (ball.isSuspended()) {
 						ball.setFalling(true);
@@ -326,6 +328,8 @@ public class MainLayout extends Composite {
 									ball.setFalling(false);
 									ball.setSuspended(false);
 									ball.setStationery(true);
+									upButton.setEnabled(true);
+									downButton.setEnabled(true);
 									cancel();
 								}
 								return bounce;
