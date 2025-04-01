@@ -1,6 +1,6 @@
 package com.tmg.server;
 
-import com.tmg.client.GreetingService;
+import com.tmg.client.Login.GreetingService;
 import com.tmg.shared.FieldVerifier;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 

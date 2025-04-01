@@ -11,6 +11,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -32,6 +33,8 @@ public class GuessingGame extends DialogBox {
 	@UiField
 	Label labelAttempts;
 
+	private PushButton pbGuess;
+
 	private double magic = 0;
 	private int attempts = 0;
 
@@ -40,6 +43,7 @@ public class GuessingGame extends DialogBox {
 	 */
 	public GuessingGame() {
 		setWidget(uiBinder.createAndBindUi(this));
+		pbGuess = new PushButton("Guessing Game");
 		closeButton.setText("Close");
 		enterButton.setText("Enter");
 		magic = Math.round(Math.random() * 100);
@@ -107,6 +111,20 @@ public class GuessingGame extends DialogBox {
 		} else {
 			return "MAGIC!";
 		}
+	}
+
+	/**
+	 * @return
+	 */
+	public PushButton getPbGuess() {
+		return pbGuess;
+	}
+
+	/**
+	 * @param pbGuess
+	 */
+	public void setPbGuess(PushButton pbGuess) {
+		this.pbGuess = pbGuess;
 	}
 
 }

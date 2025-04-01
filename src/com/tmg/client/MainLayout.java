@@ -14,14 +14,16 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.tmg.client.FileEditor.FileEditor;
+import com.tmg.client.FileEditor.FileService;
+import com.tmg.client.FileEditor.FileServiceAsync;
+import com.tmg.client.FileEditor.FileUploader;
+import com.tmg.client.Login.Login;
 import com.tmg.client.Resources.Resources;
 import com.tmg.shared.MyFoo.MyStyle;
 import com.tmg.shared.Physics;
@@ -55,84 +57,28 @@ public class MainLayout extends Composite {
 	VerticalPanel buttonPanel;
 	@UiField
 	MyStyle style;
+	FileEditor fileEditor;
+	Login login;
+	GuessingGame gg;
+	Ball ball;
 
-	Image editImage = new Image(resources.edit());
-	Image loadImage = new Image(resources.load());
-	Image saveImage = new Image(resources.save());
-	Image newImage = new Image(resources.new_file());
-	Image hardWood = new Image(resources.hardwood1());
-
-	PushButton editButton = new PushButton(editImage);
-	PushButton loadButton = new PushButton(loadImage);
-	PushButton saveButton = new PushButton(saveImage);
-	PushButton newButton = new PushButton(newImage);
-
-	Image up = new Image(resources.up());
-	Image down = new Image(resources.down());
-	Image left = new Image(resources.left());
-	Image right = new Image(resources.right());
-
-	PushButton upButton = new PushButton(up);
-	PushButton downButton = new PushButton(down);
-	PushButton leftButton = new PushButton(left);
-	PushButton rightButton = new PushButton(right);
-
-	PushButton pbLogin;
-	PushButton pbGuess;
-	PushButton pbFileViewer;
-	PushButton pbBall;
-	ToggleButton tbFriction;
-
-	Login login = new Login();
-	GuessingGame gg = new GuessingGame();
-	FileViewer viewer = new FileViewer();
-	Ball ball = new Ball();
+	FileUploader upload = new FileUploader();
 
 	public MainLayout() {
 		initWidget(uiBinder.createAndBindUi(this));
-		pbLogin = new PushButton("Login Widget");
-		pbGuess = new PushButton("Guessing Game");
-		pbFileViewer = new PushButton("File Viewer");
-		pbBall = new PushButton("Ball (Physics)");
-		tbFriction = new ToggleButton("Friction");
-		tbFriction.setValue(true);
-		tbFriction.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
-			@Override
-			public void onValueChange(ValueChangeEvent<Boolean> event) {
-				physics.setFriction(event.getValue());
-
-			}
-		});
-
-		login = new Login();
 		headerLabel.getElement().setAttribute("style", "font-weight: bold;font-size:100px;text-align:center;");
-		mainPanel.add(pbLogin);
-		mainPanel.add(pbGuess);
-		mainPanel.add(pbFileViewer);
-		mainPanel.add(pbBall);
+		login = new Login();
+		gg = new GuessingGame();
+		fileEditor = new FileEditor();
+		ball = new Ball();
+		setupControlPanel();
 
-		editButton.setTitle("Edit");
-		saveButton.setTitle("Save");
-		loadButton.setTitle("Open");
+		mainPanel.add(login.getPbLogin());
+		mainPanel.add(gg.getPbGuess());
+		mainPanel.add(fileEditor.getPbFileEditor());
+		mainPanel.add(ball.getPbBall());
 
-		buttonPanel.add(newButton);
-		buttonPanel.add(editButton);
-		buttonPanel.add(saveButton);
-		buttonPanel.add(loadButton);
-
-		controlPanel.add(upButton);
-
-		HorizontalPanel hp = new HorizontalPanel();
-		hp.add(leftButton);
-		hp.add(downButton);
-		hp.add(rightButton);
-		controlPanel.add(hp);
-		controlPanel.add(tbFriction);
-
-		controlPanel.setCellHorizontalAlignment(upButton, HasHorizontalAlignment.ALIGN_CENTER);
-
-		pbLogin.addClickHandler(new ClickHandler() {
+		login.getPbLogin().addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
@@ -148,7 +94,7 @@ public class MainLayout extends Composite {
 				setEnabled(false);
 			}
 		});
-		pbGuess.addClickHandler(new ClickHandler() {
+		gg.getPbGuess().addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
@@ -164,79 +110,16 @@ public class MainLayout extends Composite {
 				setEnabled(false);
 			}
 		});
-		ClickHandler openHandler = new ClickHandler() {
+		setUpEditorButtonHandlers();
+		setUpBallButtonHandlers();
 
-			@Override
-			public void onClick(ClickEvent event) {
-				taCanvas.setValue("");
-				taCanvas.setVisible(true);
-				tbDocument.setVisible(true);
-				viewer.openButton.setEnabled(true);
-				canvasPanel.setVisible(true);
-				buttonPanel.setVisible(true);
-				viewer.center();
-				viewer.setGlassEnabled(true);
-				tbDocument.setReadOnly(true);
-				mainCanvas.remove(ball.getBall());
-				controlPanel.setVisible(false);
-				setEnabled(false);
-			}
-		};
-		pbFileViewer.addClickHandler(openHandler);
-		loadButton.addClickHandler(openHandler);
-		viewer.closeButton.addClickHandler(new ClickHandler() {
+	}
 
-			@Override
-			public void onClick(ClickEvent event) {
-				taCanvas.setValue(viewer.getData());
-				tbDocument.setVisible(true);
-				tbDocument.setValue(viewer.upload.getFilename());
-				tbDocument.setReadOnly(true);
-				viewer.hide();
-			}
-		});
-		newButton.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				tbDocument.setReadOnly(false);
-				if (viewer.upload.getFilename().isBlank()) {
-					tbDocument.setValue("Enter path here");
-				}
-				taCanvas.setValue("");
-
-			}
-		});
-		editButton.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				taCanvas.setReadOnly(false);
-				tbDocument.setReadOnly(true);
-			}
-		});
-		saveButton.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				fileService.saveFile(tbDocument.getValue(), taCanvas.getValue(), new AsyncCallback<String>() {
-
-					@Override
-					public void onFailure(Throwable caught) {
-						Window.alert(caught.getLocalizedMessage());
-					}
-
-					@Override
-					public void onSuccess(String result) {
-						taCanvas.setReadOnly(true);
-						tbDocument.setReadOnly(true);
-						Window.alert(result);
-					}
-				});
-
-			}
-		});
-		pbBall.addClickHandler(new ClickHandler() {
+	/**
+	 * 
+	 */
+	private void setUpBallButtonHandlers() {
+		ball.getPbBall().addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
@@ -247,7 +130,7 @@ public class MainLayout extends Composite {
 				setEnabled(true);
 			}
 		});
-		rightButton.addClickHandler(new ClickHandler() {
+		ball.getRightButton().addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
@@ -256,7 +139,7 @@ public class MainLayout extends Composite {
 			}
 		});
 
-		leftButton.addClickHandler(new ClickHandler() {
+		ball.getLeftButton().addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
@@ -264,7 +147,7 @@ public class MainLayout extends Composite {
 
 			}
 		});
-		upButton.addClickHandler(new ClickHandler() {
+		ball.getUpButton().addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
@@ -277,13 +160,13 @@ public class MainLayout extends Composite {
 			}
 		});
 
-		downButton.addClickHandler(new ClickHandler() {
+		ball.getDownButton().addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				if (upButton.isEnabled() && downButton.isEnabled() && !ball.isStationary()) {
-					upButton.setEnabled(false);
-					downButton.setEnabled(false);
+				if (ball.getUpButton().isEnabled() && ball.getDownButton().isEnabled() && !ball.isStationary()) {
+					ball.getUpButton().setEnabled(false);
+					ball.getDownButton().setEnabled(false);
 				}
 				if (!ball.isStationary()) {
 					if (ball.isSuspended()) {
@@ -316,8 +199,8 @@ public class MainLayout extends Composite {
 									ball.setMoving(false);
 									ball.setSuspended(false);
 									ball.setStationary(true);
-									upButton.setEnabled(true);
-									downButton.setEnabled(true);
+									ball.getUpButton().setEnabled(true);
+									ball.getDownButton().setEnabled(true);
 									cancel();
 								}
 								return bounce;
@@ -330,6 +213,115 @@ public class MainLayout extends Composite {
 					}
 
 				}
+			}
+		});
+	}
+
+	/**
+	 * 
+	 */
+	private void setupControlPanel() {
+		ball.getTbFriction().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+
+			@Override
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				physics.setFriction(event.getValue());
+
+			}
+		});
+
+		buttonPanel.add(fileEditor.getNewButton());
+		buttonPanel.add(fileEditor.getEditButton());
+		buttonPanel.add(fileEditor.getSaveButton());
+		buttonPanel.add(fileEditor.getLoadButton());
+
+		controlPanel.add(ball.getUpButton());
+
+		HorizontalPanel hp = new HorizontalPanel();
+		hp.add(ball.getLeftButton());
+		hp.add(ball.getDownButton());
+		hp.add(ball.getRightButton());
+		controlPanel.add(hp);
+		controlPanel.add(ball.getTbFriction());
+
+		controlPanel.setCellHorizontalAlignment(ball.getUpButton(), HasHorizontalAlignment.ALIGN_CENTER);
+
+	}
+
+	/**
+	 * 
+	 */
+	private void setUpEditorButtonHandlers() {
+		ClickHandler openHandler = new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				taCanvas.setValue("");
+				taCanvas.setVisible(true);
+				tbDocument.setVisible(true);
+				upload.getOpenButton().setEnabled(true);
+				canvasPanel.setVisible(true);
+				buttonPanel.setVisible(true);
+				upload.center();
+				upload.setGlassEnabled(true);
+				tbDocument.setReadOnly(true);
+				mainCanvas.remove(ball.getBall());
+				controlPanel.setVisible(false);
+				setEnabled(false);
+			}
+		};
+		fileEditor.getPbFileEditor().addClickHandler(openHandler);
+		fileEditor.getLoadButton().addClickHandler(openHandler);
+		upload.getCloseButton().addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				taCanvas.setValue(upload.getData());
+				tbDocument.setVisible(true);
+				tbDocument.setValue(upload.getUpload().getFilename());
+				tbDocument.setReadOnly(true);
+				upload.hide();
+			}
+		});
+		fileEditor.getNewButton().addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				tbDocument.setReadOnly(false);
+				if (upload.getUpload().getFilename().isBlank()) {
+					tbDocument.setValue("Enter path here");
+				}
+				taCanvas.setValue("");
+
+			}
+		});
+		fileEditor.getEditButton().addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				taCanvas.setReadOnly(false);
+				tbDocument.setReadOnly(true);
+			}
+		});
+		fileEditor.getSaveButton().addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				fileService.saveFile(tbDocument.getValue(), taCanvas.getValue(), new AsyncCallback<String>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						Window.alert(caught.getLocalizedMessage());
+					}
+
+					@Override
+					public void onSuccess(String result) {
+						taCanvas.setReadOnly(true);
+						tbDocument.setReadOnly(true);
+						Window.alert(result);
+					}
+				});
+
 			}
 		});
 

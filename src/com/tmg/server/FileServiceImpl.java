@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.Scanner;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.tmg.client.FileService;
+import com.tmg.client.FileEditor.FileService;
 
 /**
  * The server-side implementation of the RPC service.
