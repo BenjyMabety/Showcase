@@ -15,21 +15,21 @@ public class Ball extends Composite {
 	interface BallUiBinder extends UiBinder<Widget, Ball> {
 	}
 
-	boolean live = false;
 	private int rightStep = 0;
 	private int topStep = 0;
+	// arbitrary mass of a ball. Changing this value effects the physics of the
+	// object
 	private int mass = 3;
+	// Suspended in air and subject to gravity
 	private boolean suspended = true;
-	private boolean falling = true;
-	private int gap = 0;
-	private boolean stationery = false;
-	private int pointOfOrigin = 0;
+	private boolean moving = true;
+	private int distance = 0;
+	private boolean stationary = false;
 
 	Image ball = new Image(resources.ball());
 
 	public Ball() {
 		initWidget(uiBinder.createAndBindUi(this));
-		// Image.wrap(fp.getElement());
 	}
 
 	/**
@@ -39,22 +39,9 @@ public class Ball extends Composite {
 		return ball;
 	}
 
-	public Image setLife() {
-		// TODO Auto-generated method stub
-		live = true;
-		return ball;
-	}
-
-	public Image getLife() {
-		// TODO Auto-generated method stub
-		live = false;
-		return ball;
-	}
-
-	public boolean isLive() {
-		return live;
-	}
-
+	/**
+	 * @return
+	 */
 	public int getRightStep() {
 		return rightStep;
 	}
@@ -67,14 +54,23 @@ public class Ball extends Composite {
 		return topStep;
 	}
 
+	/**
+	 * @param topStep
+	 */
 	public void setTopStep(int topStep) {
 		this.topStep = topStep;
 	}
 
+	/**
+	 * @return
+	 */
 	public int getMass() {
 		return mass;
 	}
 
+	/**
+	 * @param mass
+	 */
 	public void setMass(int mass) {
 		this.mass = mass;
 	}
@@ -83,43 +79,62 @@ public class Ball extends Composite {
 		return suspended;
 	}
 
+	/**
+	 * @param suspended
+	 */
 	public void setSuspended(boolean suspended) {
 		this.suspended = suspended;
 	}
 
-	public boolean isFalling() {
-		return falling;
+	/**
+	 * @return
+	 */
+	public boolean isMoving() {
+		return moving;
 	}
 
-	public void setFalling(boolean falling) {
-		this.falling = falling;
+	/**
+	 * @param moving
+	 */
+	public void setMoving(boolean moving) {
+		this.moving = moving;
 	}
 
-	public int getGap() {
-		return gap;
+	/**
+	 * @return
+	 */
+	public int getDistance() {
+		return distance;
 	}
 
-	public void setRunningGap(int gap) {
-		this.gap += gap;
+	/**
+	 * Used to switch toggle on or off depending on friction setting
+	 * 
+	 * @param distance
+	 */
+	public void setRunningDistance(int distance) {
+		this.distance += distance;
 	}
 
-	public void setGap(int gap) {
-		this.gap = gap;
+	/**
+	 * @param distance
+	 */
+	public void setDistance(int distance) {
+		this.distance = distance;
 	}
 
-	public boolean isStationery() {
-		return stationery;
+	/**
+	 * @return
+	 */
+	public boolean isStationary() {
+		return stationary;
 	}
 
-	public void setStationery(boolean stationery) {
-		this.stationery = stationery;
+	/**
+	 * @param stationary
+	 */
+	public void setStationary(boolean stationary) {
+		this.stationary = stationary;
 	}
 
-	public int getPointOfOrigin() {
-		return pointOfOrigin;
-	}
-
-	public void setPointOfOrigin(int pointOfOrigin) {
-		this.pointOfOrigin = pointOfOrigin;
-	}
 }

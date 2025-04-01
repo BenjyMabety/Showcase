@@ -100,13 +100,10 @@ public class MainLayout extends Composite {
 
 			@Override
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
-				// TODO Auto-generated method stub
 				physics.setFriction(event.getValue());
 
 			}
 		});
-		// Disabling for Github purposes
-		// pbBall.setEnabled(false);
 
 		login = new Login();
 		headerLabel.getElement().setAttribute("style", "font-weight: bold");
@@ -146,7 +143,7 @@ public class MainLayout extends Composite {
 				buttonPanel.setVisible(false);
 				tbDocument.setText("");
 				tbDocument.setReadOnly(true);
-				mainCanvas.remove(ball.getLife());
+				mainCanvas.remove(ball.getBall());
 				controlPanel.setVisible(false);
 				setEnabled(false);
 			}
@@ -162,7 +159,7 @@ public class MainLayout extends Composite {
 				buttonPanel.setVisible(false);
 				tbDocument.setText("");
 				tbDocument.setReadOnly(true);
-				mainCanvas.remove(ball.getLife());
+				mainCanvas.remove(ball.getBall());
 				controlPanel.setVisible(false);
 				setEnabled(false);
 			}
@@ -180,7 +177,7 @@ public class MainLayout extends Composite {
 				viewer.center();
 				viewer.setGlassEnabled(true);
 				tbDocument.setReadOnly(true);
-				mainCanvas.remove(ball.getLife());
+				mainCanvas.remove(ball.getBall());
 				controlPanel.setVisible(false);
 				setEnabled(false);
 			}
@@ -243,11 +240,10 @@ public class MainLayout extends Composite {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				// TODO Auto-generated method stub
 				canvasPanel.setVisible(false);
 				buttonPanel.setVisible(false);
 				controlPanel.setVisible(true);
-				mainCanvas.add(ball.setLife().asWidget());
+				mainCanvas.add(ball.getBall().asWidget());
 				setEnabled(true);
 			}
 		});
@@ -255,7 +251,6 @@ public class MainLayout extends Composite {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				// TODO Auto-generated method stub
 				moveX(physics.getForce(ball.getMass(), false, false));
 
 			}
@@ -265,7 +260,6 @@ public class MainLayout extends Composite {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				// TODO Auto-generated method stub
 				moveX(-physics.getForce(ball.getMass(), false, false));
 
 			}
@@ -274,11 +268,10 @@ public class MainLayout extends Composite {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				// TODO Auto-generated method stub
 				ball.setSuspended(true);
-				ball.setFalling(false);
-				ball.setStationery(false);
-				ball.setGap(0);
+				ball.setMoving(false);
+				ball.setStationary(false);
+				ball.setDistance(0);
 				moveY(-physics.getForce(ball.getMass(), false, false), false);
 
 			}
@@ -288,46 +281,41 @@ public class MainLayout extends Composite {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				// TODO Auto-generated method stub
-				if (upButton.isEnabled() && downButton.isEnabled() && !ball.isStationery()) {
+				if (upButton.isEnabled() && downButton.isEnabled() && !ball.isStationary()) {
 					upButton.setEnabled(false);
 					downButton.setEnabled(false);
 				}
-				if (!ball.isStationery()) {
+				if (!ball.isStationary()) {
 					if (ball.isSuspended()) {
-						ball.setFalling(true);
+						ball.setMoving(true);
 					}
-					if (ball.isSuspended() && ball.isFalling()) {
-						ball.setFalling(true);
+					if (ball.isSuspended() && ball.isMoving()) {
 						Timer t = new Timer() {
 
 							@Override
 							public void run() {
-								// TODO Auto-generated method stub
 								if (ball.isSuspended()) {
-									moveY(physics.getForce(ball.getMass(), ball.isFalling(), false), isRunning());
+									moveY(physics.getForce(ball.getMass(), ball.isMoving(), false), isRunning());
 								} else {
-									// Window.alert(ball.getBall().getParent().getAbsoluteTop() + "");
 									if (ball.getBall().getParent().getAbsoluteTop() >= getArc()) {
-										moveY(physics.getForce(ball.getMass(), ball.isFalling(), true), isRunning());
+										moveY(physics.getForce(ball.getMass(), ball.isMoving(), true), isRunning());
 									} else {
-										ball.setFalling(true);
+										ball.setMoving(true);
 										ball.setSuspended(true);
 									}
 								}
 							}
 
 							private int getArc() {
-								// TODO Auto-generated method stub
-								// Window.alert( + "");
-								int bounce = 181 + ball.getGap();
+								// Hard coded edge to 181 based on BG image used
+								int bounce = 181 + ball.getDistance();
 								if (physics.isFriction()) {
-									ball.setRunningGap(ball.getMass());
+									ball.setRunningDistance(ball.getMass());
 								}
-								if (ball.getGap() == 330) {
-									ball.setFalling(false);
+								if (ball.getDistance() == 330) { // arbitrary bounce frequency value
+									ball.setMoving(false);
 									ball.setSuspended(false);
-									ball.setStationery(true);
+									ball.setStationary(true);
 									upButton.setEnabled(true);
 									downButton.setEnabled(true);
 									cancel();
@@ -336,9 +324,9 @@ public class MainLayout extends Composite {
 							}
 						};
 
-						t.scheduleRepeating(physics.getForce(ball.getMass(), ball.isFalling(), false));
+						t.scheduleRepeating(physics.getForce(ball.getMass(), ball.isMoving(), false));
 					} else {
-						moveY(physics.getForce(ball.getMass(), ball.isFalling(), false), false);
+						moveY(physics.getForce(ball.getMass(), ball.isMoving(), false), false);
 					}
 
 				}
@@ -357,11 +345,15 @@ public class MainLayout extends Composite {
 
 	}
 
+	/**
+	 * @param value
+	 * @param running
+	 */
 	protected void moveY(int value, boolean running) {
 
 		if (running) {
 			if (ball.isSuspended()) {
-				if (ball.getBall().getParent().getAbsoluteTop() <= 450) {
+				if (ball.getBall().getParent().getAbsoluteTop() <= 450) {// checks bottom edge of background Image
 					ball.getBall().getParent().getElement().getStyle().setTop(ball.getTopStep() + value, Unit.PX);
 					ball.setTopStep(ball.getTopStep() + value);
 				} else {
@@ -374,14 +366,15 @@ public class MainLayout extends Composite {
 				ball.setTopStep(ball.getTopStep() + value);
 			}
 		} else {
-			// Window.alert("not running, logic here..suspended:" + ball.isSuspended() +
-			// "falling:" + ball.isFalling());
 			ball.getBall().getParent().getElement().getStyle().setTop(ball.getTopStep() + value, Unit.PX);
 			ball.setTopStep(ball.getTopStep() + value);
 		}
 
 	}
 
+	/**
+	 * @param enabled
+	 */
 	void setEnabled(boolean enabled) {
 		getElement().addClassName(enabled ? style.enabled() : style.disabled());
 		getElement().removeClassName(enabled ? style.disabled() : style.enabled());
