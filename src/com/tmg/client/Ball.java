@@ -27,7 +27,7 @@ public class Ball extends Composite {
 	private int mass = 3;
 	// Suspended in air and subject to gravity
 	private boolean suspended = true;
-	private boolean moving = true;
+	private boolean moving = false;
 	private int distance = 0;
 	private boolean stationary = false;
 
@@ -39,6 +39,7 @@ public class Ball extends Composite {
 	private PushButton rightButton;
 	private PushButton pbBall;
 	private ToggleButton tbFriction;
+	private PushButton pbKeyboard;
 
 	/**
 	 * 
@@ -49,14 +50,16 @@ public class Ball extends Composite {
 		Image down = new Image(resources.down());
 		Image left = new Image(resources.left());
 		Image right = new Image(resources.right());
+		Image keyboard = new Image(resources.keyboard());
 
 		upButton = new PushButton(up);
 		downButton = new PushButton(down);
 		leftButton = new PushButton(left);
 		rightButton = new PushButton(right);
+		pbKeyboard = new PushButton(keyboard);
 
 		pbBall = new PushButton("Ball (Physics)");
-		tbFriction = new ToggleButton("Friction");
+		tbFriction = new ToggleButton("Friction (on/off)");
 		tbFriction.setValue(true);
 
 	}
@@ -248,6 +251,20 @@ public class Ball extends Composite {
 	 */
 	public void setRightButton(PushButton rightButton) {
 		this.rightButton = rightButton;
+	}
+
+	/**
+	 * @return
+	 */
+	public PushButton getPbKeyboard() {
+		return pbKeyboard;
+	}
+
+	/**
+	 * @param pbKeyboard
+	 */
+	public void setPbKeyboard(PushButton pbKeyboard) {
+		this.pbKeyboard = pbKeyboard;
 	}
 
 }

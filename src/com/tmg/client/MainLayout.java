@@ -4,6 +4,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -151,19 +154,16 @@ public class MainLayout extends Composite {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				ball.setSuspended(true);
-				ball.setMoving(false);
-				ball.setStationary(false);
-				ball.setDistance(0);
-				moveY(-physics.getForce(ball.getMass(), false, false), false);
-
+				doUpLogic();
 			}
+
 		});
 
 		ball.getDownButton().addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
+				doDownLogic();
 				if (ball.getUpButton().isEnabled() && ball.getDownButton().isEnabled() && !ball.isStationary()) {
 					ball.getUpButton().setEnabled(false);
 					ball.getDownButton().setEnabled(false);
@@ -215,6 +215,100 @@ public class MainLayout extends Composite {
 				}
 			}
 		});
+		ball.getPbKeyboard().addKeyUpHandler(new KeyUpHandler() {
+
+			@Override
+			public void onKeyUp(KeyUpEvent event) {
+				if (event.getNativeKeyCode() == KeyCodes.KEY_RIGHT) {
+					moveX(physics.getForce(ball.getMass(), false, false));
+				}
+				if (event.getNativeKeyCode() == KeyCodes.KEY_LEFT) {
+					moveX(-physics.getForce(ball.getMass(), false, false));
+				}
+				if (event.getNativeKeyCode() == KeyCodes.KEY_UP) {
+					if (!ball.isMoving()) {
+						doUpLogic();
+					}
+					if (ball.isStationary()) {
+						doUpLogic();
+					}
+				}
+				if (event.getNativeKeyCode() == KeyCodes.KEY_DOWN) {
+					if (!ball.isMoving()) {
+						doDownLogic();
+					}
+				}
+			}
+		});
+
+	}
+
+	/**
+	 * 
+	 */
+	protected void doDownLogic() {
+		if (ball.getUpButton().isEnabled() && ball.getDownButton().isEnabled() && !ball.isStationary()) {
+			ball.getUpButton().setEnabled(false);
+			ball.getDownButton().setEnabled(false);
+		}
+		if (!ball.isStationary()) {
+			if (ball.isSuspended()) {
+				ball.setMoving(true);
+			}
+			if (ball.isSuspended() && ball.isMoving()) {
+				Timer t = new Timer() {
+
+					@Override
+					public void run() {
+						if (ball.isSuspended()) {
+							moveY(physics.getForce(ball.getMass(), ball.isMoving(), false), isRunning());
+						} else {
+							if (ball.getBall().getParent().getAbsoluteTop() >= getArc()) {
+								moveY(physics.getForce(ball.getMass(), ball.isMoving(), true), isRunning());
+							} else {
+								ball.setMoving(true);
+								ball.setSuspended(true);
+							}
+						}
+					}
+
+					private int getArc() {
+						// Hard coded edge to 181 based on BG image used
+						int bounce = 181 + ball.getDistance();
+						if (physics.isFriction()) {
+							ball.setRunningDistance(ball.getMass());
+						}
+						if (ball.getDistance() == 330) { // arbitrary bounce frequency value
+							ball.setMoving(false);
+							ball.setSuspended(false);
+							ball.setStationary(true);
+							ball.getUpButton().setEnabled(true);
+							ball.getDownButton().setEnabled(true);
+							cancel();
+						}
+						return bounce;
+					}
+				};
+
+				t.scheduleRepeating(physics.getForce(ball.getMass(), ball.isMoving(), false));
+			} else {
+				moveY(physics.getForce(ball.getMass(), ball.isMoving(), false), false);
+			}
+
+		}
+
+	}
+
+	/**
+	 * 
+	 */
+	protected void doUpLogic() {
+		ball.setSuspended(true);
+		ball.setMoving(false);
+		ball.setStationary(false);
+		ball.setDistance(0);
+		moveY(-physics.getForce(ball.getMass(), false, false), false);
+
 	}
 
 	/**
@@ -230,11 +324,6 @@ public class MainLayout extends Composite {
 			}
 		});
 
-		buttonPanel.add(fileEditor.getNewButton());
-		buttonPanel.add(fileEditor.getEditButton());
-		buttonPanel.add(fileEditor.getSaveButton());
-		buttonPanel.add(fileEditor.getLoadButton());
-
 		controlPanel.add(ball.getUpButton());
 
 		HorizontalPanel hp = new HorizontalPanel();
@@ -242,8 +331,9 @@ public class MainLayout extends Composite {
 		hp.add(ball.getDownButton());
 		hp.add(ball.getRightButton());
 		controlPanel.add(hp);
+		controlPanel.add(ball.getPbKeyboard());
 		controlPanel.add(ball.getTbFriction());
-
+		controlPanel.setCellHorizontalAlignment(hp, HasHorizontalAlignment.ALIGN_CENTER);
 		controlPanel.setCellHorizontalAlignment(ball.getUpButton(), HasHorizontalAlignment.ALIGN_CENTER);
 
 	}
@@ -252,6 +342,12 @@ public class MainLayout extends Composite {
 	 * 
 	 */
 	private void setUpEditorButtonHandlers() {
+
+		buttonPanel.add(fileEditor.getNewButton());
+		buttonPanel.add(fileEditor.getEditButton());
+		buttonPanel.add(fileEditor.getSaveButton());
+		buttonPanel.add(fileEditor.getLoadButton());
+
 		ClickHandler openHandler = new ClickHandler() {
 
 			@Override
