@@ -7,8 +7,13 @@
 		background-image: url('images/hardwood1.png'); background-repeat:no-repeat;background-position: center;background-size: auto;
 	}
 	.disabled { background-image:none; }
+	.text {
+	font-weight: bold; 
+	font-size:100px;
+	text-align:center;
+	
+}
 	</ui:style>
-
 <g:SplitLayoutPanel styleName='enabled'>
 
 <g:north size ='125'>

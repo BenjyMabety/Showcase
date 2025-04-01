@@ -106,7 +106,7 @@ public class MainLayout extends Composite {
 		});
 
 		login = new Login();
-		headerLabel.getElement().setAttribute("style", "font-weight: bold");
+		headerLabel.getElement().setAttribute("style", "font-weight: bold;font-size:100px;text-align:center;");
 		mainPanel.add(pbLogin);
 		mainPanel.add(pbGuess);
 		mainPanel.add(pbFileViewer);
