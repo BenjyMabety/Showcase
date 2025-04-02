@@ -1,6 +1,7 @@
 package com.tmg.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.media.client.Audio;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
@@ -41,6 +42,8 @@ public class Ball extends Composite {
 	private ToggleButton tbFriction;
 	private PushButton pbKeyboard;
 
+	private Audio bounce;
+
 	/**
 	 * 
 	 */
@@ -61,7 +64,10 @@ public class Ball extends Composite {
 		pbBall = new PushButton("Ball (Physics)");
 		tbFriction = new ToggleButton("Friction (on/off)");
 		tbFriction.setValue(true);
-
+		bounce = Audio.createIfSupported();
+		if (bounce != null) {
+			bounce.setSrc("waves/bounce.wav");
+		}
 	}
 
 	/**
@@ -265,6 +271,14 @@ public class Ball extends Composite {
 	 */
 	public void setPbKeyboard(PushButton pbKeyboard) {
 		this.pbKeyboard = pbKeyboard;
+	}
+
+	public Audio getBounce() {
+		return bounce;
+	}
+
+	public void setBounce(Audio bounce) {
+		this.bounce = bounce;
 	}
 
 }

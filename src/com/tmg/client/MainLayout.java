@@ -164,55 +164,6 @@ public class MainLayout extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				doDownLogic();
-				if (ball.getUpButton().isEnabled() && ball.getDownButton().isEnabled() && !ball.isStationary()) {
-					ball.getUpButton().setEnabled(false);
-					ball.getDownButton().setEnabled(false);
-				}
-				if (!ball.isStationary()) {
-					if (ball.isSuspended()) {
-						ball.setMoving(true);
-					}
-					if (ball.isSuspended() && ball.isMoving()) {
-						Timer t = new Timer() {
-
-							@Override
-							public void run() {
-								if (ball.isSuspended()) {
-									moveY(physics.getForce(ball.getMass(), ball.isMoving(), false), isRunning());
-								} else {
-									if (ball.getBall().getParent().getAbsoluteTop() >= getArc()) {
-										moveY(physics.getForce(ball.getMass(), ball.isMoving(), true), isRunning());
-									} else {
-										ball.setMoving(true);
-										ball.setSuspended(true);
-									}
-								}
-							}
-
-							private int getArc() {
-								// Hard coded edge to 181 based on BG image used
-								int bounce = 181 + ball.getDistance();
-								if (physics.isFriction()) {
-									ball.setRunningDistance(ball.getMass());
-								}
-								if (ball.getDistance() == 330) { // arbitrary bounce frequency value
-									ball.setMoving(false);
-									ball.setSuspended(false);
-									ball.setStationary(true);
-									ball.getUpButton().setEnabled(true);
-									ball.getDownButton().setEnabled(true);
-									cancel();
-								}
-								return bounce;
-							}
-						};
-
-						t.scheduleRepeating(physics.getForce(ball.getMass(), ball.isMoving(), false));
-					} else {
-						moveY(physics.getForce(ball.getMass(), ball.isMoving(), false), false);
-					}
-
-				}
 			}
 		});
 		ball.getPbKeyboard().addKeyUpHandler(new KeyUpHandler() {
@@ -265,6 +216,7 @@ public class MainLayout extends Composite {
 						} else {
 							if (ball.getBall().getParent().getAbsoluteTop() >= getArc()) {
 								moveY(physics.getForce(ball.getMass(), ball.isMoving(), true), isRunning());
+
 							} else {
 								ball.setMoving(true);
 								ball.setSuspended(true);
@@ -441,11 +393,10 @@ public class MainLayout extends Composite {
 
 		if (running) {
 			if (ball.isSuspended()) {
-				if (ball.getBall().getParent().getAbsoluteTop() <= 450) {// checks bottom edge of background Image
+				if (ball.getBall().getParent().getAbsoluteTop() <= 480) {// checks bottom edge of background Image
 					ball.getBall().getParent().getElement().getStyle().setTop(ball.getTopStep() + value, Unit.PX);
 					ball.setTopStep(ball.getTopStep() + value);
 				} else {
-
 					ball.setSuspended(false);
 				}
 			} else {
