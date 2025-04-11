@@ -11,14 +11,23 @@ import com.google.gwt.resources.client.ImageResource;
  */
 public interface Resources extends ClientBundle {
 
+	@Source("asteroid1.png")
+	ImageResource asteroid();
+
 	@Source("ball.png")
 	ImageResource ball();
+
+	@Source("bullet.png")
+	ImageResource bullet();
 
 	@Source("down.png")
 	ImageResource down();
 
 	@Source("edit.png")
 	ImageResource edit();
+
+	@Source("explosion1.png")
+	ImageResource explosion();
 
 	@Source("keyboard.png")
 	ImageResource keyboard();
@@ -37,6 +46,9 @@ public interface Resources extends ClientBundle {
 
 	@Source("save.png")
 	ImageResource save();
+
+	@Source("ship.png")
+	ImageResource ship();
 
 	@Source("up.png")
 	ImageResource up();

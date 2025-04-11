@@ -24,7 +24,6 @@ public class FileServiceImpl extends RemoteServiceServlet implements FileService
 			Scanner myReader = new Scanner(file);
 			while (myReader.hasNextLine()) {
 				data += parse(myReader.nextLine() + "\n");
-				// System.out.println(data);
 			}
 			myReader.close();
 		} catch (FileNotFoundException e) {

@@ -3,9 +3,13 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:style type='com.tmg.shared.MyFoo.MyStyle'>
-	.enabled {
+	.enabledBall {
 		background-image: url('images/hardwood1.png'); background-repeat:no-repeat;background-position: center;background-size: auto;
 	}
+	.enabledSpace{
+		background-image: url('images/space1.jpg'); background-repeat:no-repeat;background-position: center;background-size: auto;
+	}
+	
 	.disabled { background-image:none; }
 	.text {
 	font-weight: bold; 
@@ -13,6 +17,7 @@
 	text-align:center;
 	
 }
+
 	</ui:style>
 <g:SplitLayoutPanel styleName='enabled'>
 

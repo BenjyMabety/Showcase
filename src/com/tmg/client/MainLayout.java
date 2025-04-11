@@ -1,14 +1,13 @@
 package com.tmg.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
@@ -17,6 +16,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
@@ -28,6 +28,9 @@ import com.tmg.client.FileEditor.FileServiceAsync;
 import com.tmg.client.FileEditor.FileUploader;
 import com.tmg.client.Login.Login;
 import com.tmg.client.Resources.Resources;
+import com.tmg.client.SpaceForce.Asteroid;
+import com.tmg.client.SpaceForce.Bullet;
+import com.tmg.client.SpaceForce.SpaceForce;
 import com.tmg.shared.MyFoo.MyStyle;
 import com.tmg.shared.Physics;
 
@@ -64,6 +67,9 @@ public class MainLayout extends Composite {
 	Login login;
 	GuessingGame gg;
 	Ball ball;
+	SpaceForce sf;
+	Timer t;
+	Asteroid asteroid;
 
 	FileUploader upload = new FileUploader();
 
@@ -74,12 +80,13 @@ public class MainLayout extends Composite {
 		gg = new GuessingGame();
 		fileEditor = new FileEditor();
 		ball = new Ball();
-		setupControlPanel();
+		sf = new SpaceForce();
 
 		mainPanel.add(login.getPbLogin());
 		mainPanel.add(gg.getPbGuess());
 		mainPanel.add(fileEditor.getPbFileEditor());
 		mainPanel.add(ball.getPbBall());
+		mainPanel.add(sf.getPbSpaceForce());
 
 		login.getPbLogin().addClickHandler(new ClickHandler() {
 
@@ -92,9 +99,10 @@ public class MainLayout extends Composite {
 				buttonPanel.setVisible(false);
 				tbDocument.setText("");
 				tbDocument.setReadOnly(true);
-				mainCanvas.remove(ball.getBall());
+				mainCanvas.remove(ball.getImage());
+				// ball.setLive(false);
 				controlPanel.setVisible(false);
-				setEnabled(false);
+				setEnabled(false, true);
 			}
 		});
 		gg.getPbGuess().addClickHandler(new ClickHandler() {
@@ -108,185 +116,189 @@ public class MainLayout extends Composite {
 				buttonPanel.setVisible(false);
 				tbDocument.setText("");
 				tbDocument.setReadOnly(true);
-				mainCanvas.remove(ball.getBall());
+				mainCanvas.remove(ball.getImage());
+				// ball.setLive(false);
 				controlPanel.setVisible(false);
-				setEnabled(false);
+				setEnabled(false, true);
 			}
 		});
-		setUpEditorButtonHandlers();
-		setUpBallButtonHandlers();
 
-	}
-
-	/**
-	 * 
-	 */
-	private void setUpBallButtonHandlers() {
 		ball.getPbBall().addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				if (t != null) {
+					t.cancel();
+				}
+				canvasPanel.setVisible(false);
+				buttonPanel.setVisible(false);
+				setupControlPanel(true);
+				controlPanel.setVisible(true);
+				mainCanvas.add(ball.getImage().asWidget());
+				// ball.setLive(true);
+				mainCanvas.remove(sf.getImage());
+				setEnabled(true, true);
+				mainCanvas.getParent().getElement().setAttribute("style",
+						"position: absolute; inset: 0px;background-position:center;background-repeat:no-repeat");
+			}
+		});
+		sf.getPbSpaceForce().addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
 				canvasPanel.setVisible(false);
 				buttonPanel.setVisible(false);
 				controlPanel.setVisible(true);
-				mainCanvas.add(ball.getBall().asWidget());
-				setEnabled(true);
-			}
-		});
-		ball.getRightButton().addClickHandler(new ClickHandler() {
+				setupControlPanel(false);
+				mainCanvas.remove(ball.getImage());
+				// ball.setLive(false);
+				setEnabled(true, false);
+				mainCanvas.add(sf.getImage().asWidget());
+				asteroid = new Asteroid();
+				mainCanvas.add(asteroid.getImage().asWidget());
 
-			@Override
-			public void onClick(ClickEvent event) {
-				moveX(physics.getForce(ball.getMass(), false, false));
+				sf.setDistance(mainCanvas.getAbsoluteLeft());
+				asteroid.setRightStep(735);
+				// asteroid.setTopStep(195);
+				// left:735px;top:0px;
+				// left:735px;top:195px;
+				// left:735px;top:375px;
 
-			}
-		});
-
-		ball.getLeftButton().addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				moveX(-physics.getForce(ball.getMass(), false, false));
-
-			}
-		});
-		ball.getUpButton().addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				doUpLogic();
-			}
-
-		});
-
-		ball.getDownButton().addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				doDownLogic();
-			}
-		});
-		ball.getPbKeyboard().addKeyUpHandler(new KeyUpHandler() {
-
-			@Override
-			public void onKeyUp(KeyUpEvent event) {
-				if (event.getNativeKeyCode() == KeyCodes.KEY_RIGHT) {
-					moveX(physics.getForce(ball.getMass(), false, false));
-				}
-				if (event.getNativeKeyCode() == KeyCodes.KEY_LEFT) {
-					moveX(-physics.getForce(ball.getMass(), false, false));
-				}
-				if (event.getNativeKeyCode() == KeyCodes.KEY_UP) {
-					if (!ball.isMoving()) {
-						doUpLogic();
-					}
-					if (ball.isStationary()) {
-						doUpLogic();
-					}
-				}
-				if (event.getNativeKeyCode() == KeyCodes.KEY_DOWN) {
-					if (!ball.isMoving()) {
-						doDownLogic();
-					}
-				}
-			}
-		});
-
-	}
-
-	/**
-	 * 
-	 */
-	protected void doDownLogic() {
-		if (ball.getUpButton().isEnabled() && ball.getDownButton().isEnabled() && !ball.isStationary()) {
-			ball.getUpButton().setEnabled(false);
-			ball.getDownButton().setEnabled(false);
-		}
-		if (!ball.isStationary()) {
-			if (ball.isSuspended()) {
-				ball.setMoving(true);
-			}
-			if (ball.isSuspended() && ball.isMoving()) {
-				Timer t = new Timer() {
+				t = new Timer() {
 
 					@Override
 					public void run() {
-						if (ball.isSuspended()) {
-							moveY(physics.getForce(ball.getMass(), ball.isMoving(), false), isRunning());
-						} else {
-							if (ball.getBall().getParent().getAbsoluteTop() >= getArc()) {
-								moveY(physics.getForce(ball.getMass(), ball.isMoving(), true), isRunning());
-
-							} else {
-								ball.setMoving(true);
-								ball.setSuspended(true);
-							}
-						}
+						asteroid.getImage().setVisible(true);
+						redraw();
 					}
 
-					private int getArc() {
-						// Hard coded edge to 181 based on BG image used
-						int bounce = 181 + ball.getDistance();
-						if (physics.isFriction()) {
-							ball.setRunningDistance(ball.getMass());
+					private void redraw() {
+
+						mainCanvas.getParent().getElement().setAttribute("style",
+								"position: absolute; inset: 0px;background-position:" + sf.getDistance()
+										+ "px;background-repeat:repeat-x;");
+						sf.setDistance(sf.getDistance() - physics.getSpace());
+
+						asteroid.moveX(-physics.getForce(asteroid.getMass(), false, false));
+						// asteroid.moveX(-1);
+						if (physics.checkCollision(sf, asteroid)) {
+							sf.getImage().removeFromParent();
 						}
-						if (ball.getDistance() == 330) { // arbitrary bounce frequency value
-							ball.setMoving(false);
-							ball.setSuspended(false);
-							ball.setStationary(true);
-							ball.getUpButton().setEnabled(true);
-							ball.getDownButton().setEnabled(true);
-							cancel();
-						}
-						return bounce;
+
 					}
 				};
-
-				t.scheduleRepeating(physics.getForce(ball.getMass(), ball.isMoving(), false));
-			} else {
-				moveY(physics.getForce(ball.getMass(), ball.isMoving(), false), false);
-			}
-
-		}
-
-	}
-
-	/**
-	 * 
-	 */
-	protected void doUpLogic() {
-		ball.setSuspended(true);
-		ball.setMoving(false);
-		ball.setStationary(false);
-		ball.setDistance(0);
-		moveY(-physics.getForce(ball.getMass(), false, false), false);
-
-	}
-
-	/**
-	 * 
-	 */
-	private void setupControlPanel() {
-		ball.getTbFriction().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
-			@Override
-			public void onValueChange(ValueChangeEvent<Boolean> event) {
-				physics.setFriction(event.getValue());
+				t.scheduleRepeating(1000);
 
 			}
 		});
+		setUpEditorButtonHandlers();
 
-		controlPanel.add(ball.getUpButton());
+	}
 
-		HorizontalPanel hp = new HorizontalPanel();
-		hp.add(ball.getLeftButton());
-		hp.add(ball.getDownButton());
-		hp.add(ball.getRightButton());
-		controlPanel.add(hp);
-		controlPanel.add(ball.getPbKeyboard());
-		controlPanel.add(ball.getTbFriction());
-		controlPanel.setCellHorizontalAlignment(hp, HasHorizontalAlignment.ALIGN_CENTER);
-		controlPanel.setCellHorizontalAlignment(ball.getUpButton(), HasHorizontalAlignment.ALIGN_CENTER);
+	/**
+	 * 
+	 */
+	private void setupControlPanel(boolean isBall) {
+		controlPanel.clear();
+		if (isBall) {
+			controlPanel.add(ball.getUpButton());
+			HorizontalPanel hp = new HorizontalPanel();
+			hp.add(ball.getLeftButton());
+			hp.add(ball.getDownButton());
+			hp.add(ball.getRightButton());
+			controlPanel.add(hp);
+			controlPanel.add(ball.getPbKeyboard());
+			controlPanel.add(ball.getTbFriction());
+			controlPanel.setCellHorizontalAlignment(hp, HasHorizontalAlignment.ALIGN_CENTER);
+			controlPanel.setCellHorizontalAlignment(ball.getUpButton(), HasHorizontalAlignment.ALIGN_CENTER);
+		} else {
+			controlPanel.add(sf.getUpButton());
+			HorizontalPanel hp = new HorizontalPanel();
+			hp.add(sf.getLeftButton());
+			hp.add(sf.getDownButton());
+			hp.add(sf.getRightButton());
+			if (!sf.getUpButton().isEnabled() && !sf.getDownButton().isEnabled()) {
+				sf.getUpButton().setEnabled(true);
+				sf.getDownButton().setEnabled(true);
+			}
+			sf.getLeftButton().setEnabled(false);
+			sf.getRightButton().setEnabled(false);
+			controlPanel.add(hp);
+			controlPanel.add(sf.getPbKeyboard());
+			sf.getPbKeyboard().addKeyUpHandler(new KeyUpHandler() {
+
+				@Override
+				public void onKeyUp(KeyUpEvent event) {
+					/*
+					 * if (event.getNativeKeyCode() == KeyCodes.KEY_RIGHT) {
+					 * sf.moveX(physics.getForce(sf.getMass(), false, false)); } if
+					 * (event.getNativeKeyCode() == KeyCodes.KEY_LEFT) {
+					 * sf.moveX(-physics.getForce(sf.getMass(), false, false)); }
+					 */
+					if (event.getNativeKeyCode() == KeyCodes.KEY_UP) {
+						sf.moveY(-physics.getForce(sf.getMass(), false, false));
+					}
+					if (event.getNativeKeyCode() == KeyCodes.KEY_DOWN) {
+						sf.moveY(physics.getForce(sf.getMass(), false, false));
+					}
+					if (event.getNativeKeyCode() == KeyCodes.KEY_SPACE) {
+						Bullet bullet = new Bullet();
+						bullet.setTopStep(sf.getTopStep());
+						mainCanvas.add(bullet.getImage().asWidget());
+						Timer t = new Timer() {
+
+							@Override
+							public void run() {
+								bullet.moveX(physics.getForce(bullet.getMass(), false, false));
+								// Window.alert("call physics");
+								if (physics.checkCollision(bullet, asteroid)) {
+									// Window.alert("impact");
+
+									cancel();
+									destroy();
+									asteroid.setHits(1);
+									if (asteroid.getHits() == asteroid.getMass()) {
+										int top = asteroid.getImage().getAbsoluteTop();
+										int left = asteroid.getImage().getAbsoluteLeft();
+										asteroid.getImage().removeFromParent();
+										Timer tFire = new Timer() {
+
+											@Override
+											public void run() {
+												// TODO Auto-generated method stub
+												Image fire = new Image(resources.explosion());
+												fire.getElement().getStyle().setPosition(Position.ABSOLUTE);
+												fire.getElement().getStyle().setLeft(left, Unit.PX);
+												fire.getElement().getStyle().setTop(top, Unit.PX);
+												mainCanvas.add(fire);
+
+											}
+
+										};
+										tFire.schedule(1000);
+
+									}
+								}
+								if (bullet.getImage().getAbsoluteLeft() > 1200) {
+									cancel();
+									destroy();
+								}
+
+							}
+
+							private void destroy() {
+								bullet.getImage().removeFromParent();
+							}
+						};
+						t.scheduleRepeating(50);
+					}
+				}
+			});
+
+			controlPanel.setCellHorizontalAlignment(hp, HasHorizontalAlignment.ALIGN_CENTER);
+			controlPanel.setCellHorizontalAlignment(sf.getUpButton(), HasHorizontalAlignment.ALIGN_CENTER);
+
+		}
 
 	}
 
@@ -313,9 +325,9 @@ public class MainLayout extends Composite {
 				upload.center();
 				upload.setGlassEnabled(true);
 				tbDocument.setReadOnly(true);
-				mainCanvas.remove(ball.getBall());
+				mainCanvas.remove(ball.getImage());
 				controlPanel.setVisible(false);
-				setEnabled(false);
+				setEnabled(false, true);
 			}
 		};
 		fileEditor.getPbFileEditor().addClickHandler(openHandler);
@@ -376,47 +388,23 @@ public class MainLayout extends Composite {
 	}
 
 	/**
-	 * @param value
-	 */
-	protected void moveX(int value) {
-
-		ball.getBall().getParent().getElement().getStyle().setLeft(ball.getRightStep() + value, Unit.PX);
-		ball.setRightStep(ball.getRightStep() + value);
-
-	}
-
-	/**
-	 * @param value
-	 * @param running
-	 */
-	protected void moveY(int value, boolean running) {
-
-		if (running) {
-			if (ball.isSuspended()) {
-				if (ball.getBall().getParent().getAbsoluteTop() <= 480) {// checks bottom edge of background Image
-					ball.getBall().getParent().getElement().getStyle().setTop(ball.getTopStep() + value, Unit.PX);
-					ball.setTopStep(ball.getTopStep() + value);
-				} else {
-					ball.setSuspended(false);
-				}
-			} else {
-
-				ball.getBall().getParent().getElement().getStyle().setTop(ball.getTopStep() + value, Unit.PX);
-				ball.setTopStep(ball.getTopStep() + value);
-			}
-		} else {
-			ball.getBall().getParent().getElement().getStyle().setTop(ball.getTopStep() + value, Unit.PX);
-			ball.setTopStep(ball.getTopStep() + value);
-		}
-
-	}
-
-	/**
 	 * @param enabled
 	 */
-	void setEnabled(boolean enabled) {
-		getElement().addClassName(enabled ? style.enabled() : style.disabled());
-		getElement().removeClassName(enabled ? style.disabled() : style.enabled());
+	void setEnabled(boolean enabled, boolean ball) {
+		if (ball) {
+			getElement().addClassName(enabled ? style.enabledBall() : style.disabled());
+			getElement().addClassName(enabled ? style.enabledBall() : style.enabledSpace());
+			getElement().removeClassName(enabled ? style.disabled() : style.enabledBall());
+			getElement().removeClassName(enabled ? style.enabledSpace() : style.enabledBall());
+		}
+
+		else {
+			getElement().addClassName(enabled ? style.enabledSpace() : style.disabled());
+			getElement().addClassName(enabled ? style.enabledSpace() : style.enabledBall());
+			getElement().removeClassName(enabled ? style.disabled() : style.enabledSpace());
+			getElement().removeClassName(enabled ? style.enabledBall() : style.enabledSpace());
+		}
+
 	}
 
 }

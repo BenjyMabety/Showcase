@@ -1,66 +1,51 @@
 package com.tmg.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Position;
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.media.client.Audio;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.ToggleButton;
-import com.google.gwt.user.client.ui.Widget;
 import com.tmg.client.Resources.Resources;
+import com.tmg.shared.Movable;
+import com.tmg.shared.Physics;
 
 /**
  * 
  */
-public class Ball extends Composite {
+public class Ball extends Movable {
 
-	private static BallUiBinder uiBinder = GWT.create(BallUiBinder.class);
 	Resources resources = GWT.create(Resources.class);
+	Physics physics = new Physics();
 
-	interface BallUiBinder extends UiBinder<Widget, Ball> {
-	}
-
-	private int rightStep = 0;
-	private int topStep = 0;
-	// arbitrary mass of a ball. Changing this value effects the physics of the
-	// object
-	private int mass = 3;
 	// Suspended in air and subject to gravity
 	private boolean suspended = true;
 	private boolean moving = false;
-	private int distance = 0;
+
 	private boolean stationary = false;
 
-	Image ball = new Image(resources.ball());
-
-	private PushButton upButton;
-	private PushButton downButton;
-	private PushButton leftButton;
-	private PushButton rightButton;
-	private PushButton pbBall;
-	private ToggleButton tbFriction;
-	private PushButton pbKeyboard;
-
+	PushButton pbBall;
+	ToggleButton tbFriction;
 	private Audio bounce;
 
 	/**
 	 * 
 	 */
 	public Ball() {
-		initWidget(uiBinder.createAndBindUi(this));
-		Image up = new Image(resources.up());
-		Image down = new Image(resources.down());
-		Image left = new Image(resources.left());
-		Image right = new Image(resources.right());
-		Image keyboard = new Image(resources.keyboard());
-
-		upButton = new PushButton(up);
-		downButton = new PushButton(down);
-		leftButton = new PushButton(left);
-		rightButton = new PushButton(right);
-		pbKeyboard = new PushButton(keyboard);
-
+		image = new Image(resources.ball());
+		rightStep = 0;
+		topStep = 0;
+		mass = 3;
+		distance = 0;
 		pbBall = new PushButton("Ball (Physics)");
 		tbFriction = new ToggleButton("Friction (on/off)");
 		tbFriction.setValue(true);
@@ -68,49 +53,78 @@ public class Ball extends Composite {
 		if (bounce != null) {
 			bounce.setSrc("waves/bounce.wav");
 		}
-	}
 
-	/**
-	 * @return
-	 */
-	public Image getBall() {
-		return ball;
-	}
+		getRightButton().addClickHandler(new ClickHandler() {
 
-	/**
-	 * @return
-	 */
-	public int getRightStep() {
-		return rightStep;
-	}
+			@Override
+			public void onClick(ClickEvent event) {
+				moveX(physics.getForce(getMass(), false, false));
 
-	public void setRightStep(int rightStep) {
-		this.rightStep = rightStep;
-	}
+			}
+		});
+		getLeftButton().addClickHandler(new ClickHandler() {
 
-	public int getTopStep() {
-		return topStep;
-	}
+			@Override
+			public void onClick(ClickEvent event) {
+				moveX(-physics.getForce(getMass(), false, false));
 
-	/**
-	 * @param topStep
-	 */
-	public void setTopStep(int topStep) {
-		this.topStep = topStep;
-	}
+			}
+		});
 
-	/**
-	 * @return
-	 */
-	public int getMass() {
-		return mass;
-	}
+		getUpButton().addClickHandler(new ClickHandler() {
 
-	/**
-	 * @param mass
-	 */
-	public void setMass(int mass) {
-		this.mass = mass;
+			@Override
+			public void onClick(ClickEvent event) {
+
+				doUpLogic();
+
+			}
+		});
+
+		getDownButton().addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				doDownLogic();
+
+			}
+		});
+
+		getPbKeyboard().addKeyUpHandler(new KeyUpHandler() {
+
+			@Override
+			public void onKeyUp(KeyUpEvent event) {
+				if (event.getNativeKeyCode() == KeyCodes.KEY_RIGHT) {
+					moveX(physics.getForce(getMass(), false, false));
+				}
+				if (event.getNativeKeyCode() == KeyCodes.KEY_LEFT) {
+					moveX(-physics.getForce(getMass(), false, false));
+				}
+				if (event.getNativeKeyCode() == KeyCodes.KEY_UP) {
+					if (!isMoving()) {
+						doUpLogic();
+					}
+					if (isStationary()) {
+						doUpLogic();
+					}
+				}
+				if (event.getNativeKeyCode() == KeyCodes.KEY_DOWN) {
+					if (!isMoving()) {
+
+						doDownLogic();
+					}
+				}
+			}
+		});
+
+		getTbFriction().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+
+			@Override
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				physics.setFriction(event.getValue());
+
+			}
+		});
 	}
 
 	public boolean isSuspended() {
@@ -139,26 +153,12 @@ public class Ball extends Composite {
 	}
 
 	/**
-	 * @return
-	 */
-	public int getDistance() {
-		return distance;
-	}
-
-	/**
 	 * Used to switch toggle on or off depending on friction setting
 	 * 
 	 * @param distance
 	 */
 	public void setRunningDistance(int distance) {
 		this.distance += distance;
-	}
-
-	/**
-	 * @param distance
-	 */
-	public void setDistance(int distance) {
-		this.distance = distance;
 	}
 
 	/**
@@ -206,79 +206,132 @@ public class Ball extends Composite {
 	/**
 	 * @return
 	 */
-	public PushButton getUpButton() {
-		return upButton;
-	}
-
-	/**
-	 * @param upButton
-	 */
-	public void setUpButton(PushButton upButton) {
-		this.upButton = upButton;
-	}
-
-	/**
-	 * @return
-	 */
-	public PushButton getDownButton() {
-		return downButton;
-	}
-
-	/**
-	 * @param downButton
-	 */
-	public void setDownButton(PushButton downButton) {
-		this.downButton = downButton;
-	}
-
-	/**
-	 * @return
-	 */
-	public PushButton getLeftButton() {
-		return leftButton;
-	}
-
-	/**
-	 * @param leftButton
-	 */
-	public void setLeftButton(PushButton leftButton) {
-		this.leftButton = leftButton;
-	}
-
-	/**
-	 * @return
-	 */
-	public PushButton getRightButton() {
-		return rightButton;
-	}
-
-	/**
-	 * @param rightButton
-	 */
-	public void setRightButton(PushButton rightButton) {
-		this.rightButton = rightButton;
-	}
-
-	/**
-	 * @return
-	 */
-	public PushButton getPbKeyboard() {
-		return pbKeyboard;
-	}
-
-	/**
-	 * @param pbKeyboard
-	 */
-	public void setPbKeyboard(PushButton pbKeyboard) {
-		this.pbKeyboard = pbKeyboard;
-	}
-
 	public Audio getBounce() {
 		return bounce;
 	}
 
+	/**
+	 * @param bounce
+	 */
 	public void setBounce(Audio bounce) {
 		this.bounce = bounce;
 	}
 
+	/**
+	 * @param value
+	 */
+	public void moveX(int value) {
+
+		image.getElement().getStyle().setPosition(Position.ABSOLUTE);
+		image.getElement().getStyle().setLeft(getRightStep() + value, Unit.PX);
+		setRightStep(getRightStep() + value);
+
+	}
+
+	/**
+	 * @param value
+	 * @param running
+	 */
+	protected void moveY(int value, boolean running) {
+
+		if (running) {
+			if (isSuspended()) {
+				if (image.getAbsoluteTop() <= 480) {// checks bottom edge of background Image
+					moveY(value);
+				} else {
+					setSuspended(false);
+				}
+			} else {
+
+				moveY(value);
+			}
+		} else {
+			moveY(value);
+		}
+
+	}
+
+	/**
+	 *
+	 */
+	public void moveY(int value) {
+		image.getElement().getStyle().setPosition(Position.ABSOLUTE);
+		image.getElement().getStyle().setTop(getTopStep() + value, Unit.PX);
+		setTopStep(getTopStep() + value);
+	}
+
+	/**
+	 * 
+	 */
+	protected void doUpLogic() {
+		setSuspended(true);
+		setMoving(false);
+		setStationary(false);
+		setDistance(0);
+		moveY(-physics.getForce(getMass(), false, false), false);
+
+	}
+
+	/**
+	 * 
+	 */
+	protected void doDownLogic() {
+		if (getUpButton().isEnabled() && getDownButton().isEnabled() && !isStationary()) {
+			getUpButton().setEnabled(false);
+			getDownButton().setEnabled(false);
+		}
+		if (!isStationary()) {
+			if (isSuspended()) {
+				setMoving(true);
+			}
+			if (isSuspended() && isMoving()) {
+				Timer t = new Timer() {
+
+					@Override
+					public void run() {
+						if (isSuspended()) {
+							moveY(physics.getForce(getMass(), isMoving(), false), isRunning());
+						} else {
+							if (getImage().getAbsoluteTop() >= getArc()) {
+								moveY(physics.getForce(getMass(), isMoving(), true), isRunning());
+
+							} else {
+								setMoving(true);
+								setSuspended(true);
+							}
+						}
+					}
+
+					private int getArc() {
+						// Hard coded edge to 181 based on BG image used
+						int bounce = 181 + getDistance();
+						if (physics.isFriction()) {
+							setRunningDistance(getMass());
+						}
+						if (getDistance() == 330) { // arbitrary bounce frequency value
+							setMoving(false);
+							setSuspended(false);
+							setStationary(true);
+							getUpButton().setEnabled(true);
+							getDownButton().setEnabled(true);
+							cancel();
+						}
+						return bounce;
+					}
+				};
+
+				t.scheduleRepeating(physics.getForce(getMass(), isMoving(), false));
+			} else {
+				moveY(physics.getForce(getMass(), isMoving(), false), false);
+			}
+
+		}
+
+	}
+
+	@Override
+	public Image getImage() {
+		// TODO Auto-generated method stub
+		return image;
+	}
 }

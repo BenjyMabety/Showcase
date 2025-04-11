@@ -14,6 +14,7 @@ public class Physics {
 	private double drag = 0.2;
 	private int resistance = 0;
 	private boolean friction = true;
+	private int space = 100;
 
 	public Physics() {
 	}
@@ -63,6 +64,47 @@ public class Physics {
 	 */
 	public void setFriction(boolean friction) {
 		this.friction = friction;
+	}
+
+	/**
+	 * @return
+	 */
+	public int getSpace() {
+		return space;
+	}
+
+	/**
+	 * @param space
+	 */
+	public void setSpace(int space) {
+		this.space = space;
+	}
+
+	/**
+	 * @param m1
+	 * @param m2
+	 * @return
+	 */
+	public boolean checkCollision(Movable m1, Movable m2) {
+
+		// left:735px;top:0px;
+		// left:735px;top:195px;
+		// left:735px;top:375px;
+		if ((m1.getImage().getAbsoluteLeft() - 40 > m2.getImage().getAbsoluteLeft())
+				&& (m1.getImage().getAbsoluteTop() - 40 > m2.getImage().getAbsoluteTop())) {
+			if (m1.getImage().getAbsoluteTop() - 40 > ((m2.getImage().getAbsoluteTop() - 40) + 165)) {
+				// Window.alert("m1:" + m1.getImage().getAbsoluteTop() + " m2:" +
+				// m2.getImage().getAbsoluteTop());
+				return false;
+			}
+			// GET THE Bottom by subtracting the top from the height of the background logic
+			// magic
+			return true;
+		} else {
+			// Window.alert("m1:" + m1.getImage().getAbsoluteLeft() + " m2:" +
+			// m2.getImage().getAbsoluteLeft());
+			return false;
+		}
 	}
 
 }
