@@ -15,10 +15,9 @@ public class Asteroid extends Movable {
 	int hits = 0;
 
 	public Asteroid() {
-		// TODO Auto-generated constructor stub
 		// image.setResource(resources.asteroid());
 		image = new Image(resources.asteroid());
-		mass = 5;
+		mass = 3;
 		rightStep = 0;
 		topStep = 0;
 		image.setVisible(false);
@@ -28,27 +27,25 @@ public class Asteroid extends Movable {
 	public void moveX(int value) {
 
 		image.getElement().getStyle().setPosition(Position.ABSOLUTE);
-		image.getElement().getStyle().setTop(180, Unit.PX);
+		image.getElement().getStyle().setTop(getTopStep() - 60, Unit.PX);
 		image.getElement().getStyle().setLeft(getRightStep() + value, Unit.PX);
 		image.setVisible(true);
 		setRightStep(getRightStep() + value);
+		setTopStep(getTopStep());
 
 	}
 
 	@Override
 	public void moveY(int value) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public Image getImage() {
-		// TODO Auto-generated method stub
 		return image;
 	}
 
 	public int getHits() {
-		// TODO Auto-generated method stub
 		return hits;
 	}
 

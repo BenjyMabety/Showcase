@@ -12,7 +12,6 @@ public class Bullet extends Movable {
 	Physics physics = new Physics();
 
 	public Bullet() {
-		// image.setResource(resources.bullet());
 		image = new Image(resources.bullet());
 		mass = 1;
 		rightStep = 0;
@@ -36,7 +35,6 @@ public class Bullet extends Movable {
 
 	@Override
 	public Image getImage() {
-		// TODO Auto-generated method stub
 		return image;
 	}
 

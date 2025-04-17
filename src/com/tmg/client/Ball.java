@@ -85,6 +85,7 @@ public class Ball extends Movable {
 
 			@Override
 			public void onClick(ClickEvent event) {
+
 				doDownLogic();
 
 			}
@@ -110,7 +111,6 @@ public class Ball extends Movable {
 				}
 				if (event.getNativeKeyCode() == KeyCodes.KEY_DOWN) {
 					if (!isMoving()) {
-
 						doDownLogic();
 					}
 				}
@@ -127,6 +127,9 @@ public class Ball extends Movable {
 		});
 	}
 
+	/**
+	 * @return
+	 */
 	public boolean isSuspended() {
 		return suspended;
 	}
@@ -331,7 +334,6 @@ public class Ball extends Movable {
 
 	@Override
 	public Image getImage() {
-		// TODO Auto-generated method stub
 		return image;
 	}
 }

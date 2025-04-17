@@ -43,7 +43,7 @@ public class FileServiceImpl extends RemoteServiceServlet implements FileService
 	@Override
 	public String saveFile(String fileName, String content) throws IllegalArgumentException {
 		try {
-			FileWriter myWriter = new FileWriter(fileName);
+			FileWriter myWriter = new FileWriter(fileName + ".html");
 			myWriter.write(content);
 			myWriter.close();
 			return "Successfully wrote to the file.";

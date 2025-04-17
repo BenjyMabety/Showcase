@@ -15,12 +15,7 @@ public class SpaceForce extends Movable {
 
 	Resources resources = GWT.create(Resources.class);
 	Physics physics = new Physics();
-
-	// arbitrary mass of a ball. Changing this value effects the physics of the
-	// object
-
 	private int distance = 0;
-
 	PushButton pbSpaceForce;
 
 	public SpaceForce() {

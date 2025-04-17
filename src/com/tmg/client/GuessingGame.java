@@ -15,6 +15,9 @@ import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
+/**
+ * 
+ */
 public class GuessingGame extends DialogBox {
 
 	private static GuessingGameUiBinder uiBinder = GWT.create(GuessingGameUiBinder.class);

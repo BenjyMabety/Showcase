@@ -92,17 +92,12 @@ public class Physics {
 		// left:735px;top:375px;
 		if ((m1.getImage().getAbsoluteLeft() - 40 > m2.getImage().getAbsoluteLeft())
 				&& (m1.getImage().getAbsoluteTop() - 40 > m2.getImage().getAbsoluteTop())) {
-			if (m1.getImage().getAbsoluteTop() - 40 > ((m2.getImage().getAbsoluteTop() - 40) + 165)) {
-				// Window.alert("m1:" + m1.getImage().getAbsoluteTop() + " m2:" +
-				// m2.getImage().getAbsoluteTop());
+			if (m1.getImage().getAbsoluteTop() - 40 > (m2.getImage().getAbsoluteTop() + 165)) {
 				return false;
 			}
-			// GET THE Bottom by subtracting the top from the height of the background logic
-			// magic
 			return true;
+
 		} else {
-			// Window.alert("m1:" + m1.getImage().getAbsoluteLeft() + " m2:" +
-			// m2.getImage().getAbsoluteLeft());
 			return false;
 		}
 	}

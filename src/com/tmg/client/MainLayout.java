@@ -1,8 +1,9 @@
 package com.tmg.client;
 
+import java.util.ArrayList;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Position;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -16,7 +17,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
@@ -69,7 +69,7 @@ public class MainLayout extends Composite {
 	Ball ball;
 	SpaceForce sf;
 	Timer t;
-	Asteroid asteroid;
+	ArrayList<Asteroid> asteroids = new ArrayList<Asteroid>();
 
 	FileUploader upload = new FileUploader();
 
@@ -100,6 +100,7 @@ public class MainLayout extends Composite {
 				tbDocument.setText("");
 				tbDocument.setReadOnly(true);
 				mainCanvas.remove(ball.getImage());
+				clearAsteroids();
 				// ball.setLive(false);
 				controlPanel.setVisible(false);
 				setEnabled(false, true);
@@ -117,6 +118,7 @@ public class MainLayout extends Composite {
 				tbDocument.setText("");
 				tbDocument.setReadOnly(true);
 				mainCanvas.remove(ball.getImage());
+				clearAsteroids();
 				// ball.setLive(false);
 				controlPanel.setVisible(false);
 				setEnabled(false, true);
@@ -137,6 +139,7 @@ public class MainLayout extends Composite {
 				mainCanvas.add(ball.getImage().asWidget());
 				// ball.setLive(true);
 				mainCanvas.remove(sf.getImage());
+				clearAsteroids();
 				setEnabled(true, true);
 				mainCanvas.getParent().getElement().setAttribute("style",
 						"position: absolute; inset: 0px;background-position:center;background-repeat:no-repeat");
@@ -154,12 +157,9 @@ public class MainLayout extends Composite {
 				// ball.setLive(false);
 				setEnabled(true, false);
 				mainCanvas.add(sf.getImage().asWidget());
-				asteroid = new Asteroid();
-				mainCanvas.add(asteroid.getImage().asWidget());
-
+				renderAsteroids();
 				sf.setDistance(mainCanvas.getAbsoluteLeft());
-				asteroid.setRightStep(735);
-				// asteroid.setTopStep(195);
+
 				// left:735px;top:0px;
 				// left:735px;top:195px;
 				// left:735px;top:375px;
@@ -168,7 +168,6 @@ public class MainLayout extends Composite {
 
 					@Override
 					public void run() {
-						asteroid.getImage().setVisible(true);
 						redraw();
 					}
 
@@ -178,20 +177,87 @@ public class MainLayout extends Composite {
 								"position: absolute; inset: 0px;background-position:" + sf.getDistance()
 										+ "px;background-repeat:repeat-x;");
 						sf.setDistance(sf.getDistance() - physics.getSpace());
-
-						asteroid.moveX(-physics.getForce(asteroid.getMass(), false, false));
-						// asteroid.moveX(-1);
-						if (physics.checkCollision(sf, asteroid)) {
-							sf.getImage().removeFromParent();
+						for (int i = 0; i < asteroids.size(); i++) {
+							asteroids.get(i).moveX(-physics.getForce(asteroids.get(i).getMass(), false, false));
+							if (asteroids.get(i).getImage().getAbsoluteLeft() < 165) {
+								asteroids.remove(asteroids.get(i));
+								continue;
+							}
+							// asteroid.moveX(-1);
+							if (physics.checkCollision(sf, asteroids.get(i))) {
+								Window.alert("Game Over");
+								sf.getImage().removeFromParent();
+								resetSpace();
+							}
+						}
+						if (asteroids.isEmpty()) {
+							renderAsteroids();
 						}
 
 					}
+
 				};
 				t.scheduleRepeating(1000);
 
 			}
 		});
 		setUpEditorButtonHandlers();
+
+	}
+
+	/**
+	 * 
+	 */
+	protected void clearAsteroids() {
+		for (Asteroid ast : asteroids) {
+			ast.getImage().removeFromParent();
+		}
+		asteroids.clear();
+	}
+
+	/**
+	 * 
+	 */
+	protected void renderAsteroids() {
+		int gap = 0;
+		int rightGap = 0;
+		// left:735px;top:0px;
+		// left:735px;top:195px;
+		// left:735px;top:375px;
+		for (int i = 0; i < 9; i++) {
+			Asteroid asteroid = new Asteroid();
+			asteroid.setRightStep(735 + rightGap);
+			asteroid.setTopStep(i + gap);
+			asteroid.getImage().getElement().getStyle().setPosition(Position.ABSOLUTE);
+			gap = generateGap();
+			mainCanvas.add(asteroid.getImage());
+			asteroids.add(asteroid);
+			if (i == 2) {
+				gap = 0;
+				rightGap = 140 * 3;
+			}
+			if (i == 5) {
+				gap = 0;
+				rightGap = 140 * 6;
+			}
+
+		}
+	}
+
+	/**
+	 * @return
+	 */
+	private int generateGap() {
+		int factor = (int) Math.round(Math.random() * 280);
+		return factor;
+	}
+
+	private void resetSpace() {
+		// TODO Auto-generated method stub
+		clearAsteroids();
+		mainCanvas.add(sf.getImage().asWidget());
+		renderAsteroids();
+		sf.setDistance(mainCanvas.getAbsoluteLeft());
 
 	}
 
@@ -245,38 +311,22 @@ public class MainLayout extends Composite {
 						Bullet bullet = new Bullet();
 						bullet.setTopStep(sf.getTopStep());
 						mainCanvas.add(bullet.getImage().asWidget());
-						Timer t = new Timer() {
+						Timer tBullet = new Timer() {
 
 							@Override
 							public void run() {
-								bullet.moveX(physics.getForce(bullet.getMass(), false, false));
-								// Window.alert("call physics");
-								if (physics.checkCollision(bullet, asteroid)) {
-									// Window.alert("impact");
-
-									cancel();
-									destroy();
-									asteroid.setHits(1);
-									if (asteroid.getHits() == asteroid.getMass()) {
-										int top = asteroid.getImage().getAbsoluteTop();
-										int left = asteroid.getImage().getAbsoluteLeft();
-										asteroid.getImage().removeFromParent();
-										Timer tFire = new Timer() {
-
-											@Override
-											public void run() {
-												// TODO Auto-generated method stub
-												Image fire = new Image(resources.explosion());
-												fire.getElement().getStyle().setPosition(Position.ABSOLUTE);
-												fire.getElement().getStyle().setLeft(left, Unit.PX);
-												fire.getElement().getStyle().setTop(top, Unit.PX);
-												mainCanvas.add(fire);
-
-											}
-
-										};
-										tFire.schedule(1000);
-
+								if (sf.getImage().isAttached()) {
+									bullet.moveX(physics.getForce(bullet.getMass(), false, false));
+								}
+								for (Asteroid asteroid : asteroids) {
+									if (physics.checkCollision(bullet, asteroid)) {
+										asteroid.setHits(1);
+										if (asteroid.getHits() == asteroid.getMass()) {
+											asteroid.getImage().removeFromParent();
+											asteroids.remove(asteroid);
+										}
+										cancel();
+										destroy();
 									}
 								}
 								if (bullet.getImage().getAbsoluteLeft() > 1200) {
@@ -290,7 +340,7 @@ public class MainLayout extends Composite {
 								bullet.getImage().removeFromParent();
 							}
 						};
-						t.scheduleRepeating(50);
+						tBullet.scheduleRepeating(50);
 					}
 				}
 			});
@@ -326,6 +376,7 @@ public class MainLayout extends Composite {
 				upload.setGlassEnabled(true);
 				tbDocument.setReadOnly(true);
 				mainCanvas.remove(ball.getImage());
+				clearAsteroids();
 				controlPanel.setVisible(false);
 				setEnabled(false, true);
 			}
