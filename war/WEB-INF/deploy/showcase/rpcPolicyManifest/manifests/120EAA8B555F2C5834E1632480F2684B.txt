@@ -1,0 +1,2 @@
+serviceClass: com.tmg.client.FileEditor.FileService
+path: 28D2FA476AE439F1A87EDB01064CFF46.gwt.rpc

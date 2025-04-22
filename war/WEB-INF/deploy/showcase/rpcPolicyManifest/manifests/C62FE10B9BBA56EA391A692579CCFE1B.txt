@@ -1,0 +1,2 @@
+serviceClass: com.tmg.client.Login.GreetingService
+path: 184E079F11D7C0A5A11C8449D1C530CF.gwt.rpc

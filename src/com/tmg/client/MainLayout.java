@@ -92,6 +92,9 @@ public class MainLayout extends Composite {
 
 			@Override
 			public void onClick(ClickEvent event) {
+				if (t != null) {
+					t.cancel();
+				}
 				login.center();
 				login.setGlassEnabled(true);
 				taCanvas.setVisible(false);
@@ -100,6 +103,7 @@ public class MainLayout extends Composite {
 				tbDocument.setText("");
 				tbDocument.setReadOnly(true);
 				mainCanvas.remove(ball.getImage());
+				mainCanvas.remove(sf.getImage());
 				clearAsteroids();
 				// ball.setLive(false);
 				controlPanel.setVisible(false);
@@ -110,6 +114,9 @@ public class MainLayout extends Composite {
 
 			@Override
 			public void onClick(ClickEvent event) {
+				if (t != null) {
+					t.cancel();
+				}
 				gg.center();
 				gg.setGlassEnabled(true);
 				taCanvas.setVisible(false);
@@ -118,6 +125,7 @@ public class MainLayout extends Composite {
 				tbDocument.setText("");
 				tbDocument.setReadOnly(true);
 				mainCanvas.remove(ball.getImage());
+				mainCanvas.remove(sf.getImage());
 				clearAsteroids();
 				// ball.setLive(false);
 				controlPanel.setVisible(false);
@@ -252,8 +260,10 @@ public class MainLayout extends Composite {
 		return factor;
 	}
 
+	/**
+	 * 
+	 */
 	private void resetSpace() {
-		// TODO Auto-generated method stub
 		clearAsteroids();
 		mainCanvas.add(sf.getImage().asWidget());
 		renderAsteroids();
@@ -366,6 +376,9 @@ public class MainLayout extends Composite {
 
 			@Override
 			public void onClick(ClickEvent event) {
+				if (t != null) {
+					t.cancel();
+				}
 				taCanvas.setValue("");
 				taCanvas.setVisible(true);
 				tbDocument.setVisible(true);
@@ -376,6 +389,7 @@ public class MainLayout extends Composite {
 				upload.setGlassEnabled(true);
 				tbDocument.setReadOnly(true);
 				mainCanvas.remove(ball.getImage());
+				mainCanvas.remove(sf.getImage());
 				clearAsteroids();
 				controlPanel.setVisible(false);
 				setEnabled(false, true);
